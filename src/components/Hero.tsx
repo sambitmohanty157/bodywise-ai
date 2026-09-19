@@ -14,6 +14,10 @@ interface HeroProps {
   onSignUp: () => void;
 }
 
+/* =========================================================
+   FEATURE CARD
+========================================================= */
+
 function FeatureCard({
   icon: Icon,
   title,
@@ -24,22 +28,46 @@ function FeatureCard({
   subtitle: string;
 }) {
   return (
-    <div className="group flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.035] px-5 py-4 backdrop-blur-md transition-all duration-300 hover:border-brand-red/30 hover:bg-white/[0.055]">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-red/10 border border-brand-red/15">
+    <div
+      className="
+        group flex items-center gap-4
+        rounded-2xl
+        border border-white/[0.08]
+        bg-white/[0.035]
+        px-5 py-4
+        backdrop-blur-xl
+        transition-all duration-300
+        hover:border-brand-red/30
+        hover:bg-white/[0.055]
+      "
+    >
+      <div
+        className="
+          flex h-12 w-12 shrink-0 items-center justify-center
+          rounded-xl
+          border border-brand-red/15
+          bg-brand-red/10
+        "
+      >
         <Icon className="h-5 w-5 text-brand-red" />
       </div>
 
-      <div>
-        <p className="text-sm sm:text-base font-semibold text-white">
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-white sm:text-base">
           {title}
         </p>
-        <p className="text-xs sm:text-sm text-surface-gray-400">
+
+        <p className="text-xs text-surface-gray-400 sm:text-sm">
           {subtitle}
         </p>
       </div>
     </div>
   );
 }
+
+/* =========================================================
+   FLOATING CARD
+========================================================= */
 
 function FloatingCard({
   icon: Icon,
@@ -54,31 +82,64 @@ function FloatingCard({
 }) {
   return (
     <div
-      className={`rounded-2xl border border-white/[0.1] bg-[#111111]/90 px-4 py-3 shadow-2xl backdrop-blur-xl ${className}`}
+      className={`
+        rounded-2xl
+        border border-white/[0.10]
+        bg-[#111111]/90
+        shadow-[0_20px_60px_rgba(0,0,0,0.45)]
+        backdrop-blur-xl
+        ${className}
+      `}
     >
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-red/10">
+      <div className="flex items-center gap-3 px-4 py-3.5 sm:px-5 sm:py-4">
+
+        <div
+          className="
+            flex h-10 w-10 shrink-0
+            items-center justify-center
+            rounded-xl
+            bg-brand-red/10
+            border border-brand-red/10
+          "
+        >
           <Icon className="h-5 w-5 text-brand-red" />
         </div>
 
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-white">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-white sm:text-base">
             {title}
           </p>
-          <p className="text-[11px] text-surface-gray-400">
+
+          <p className="truncate text-[11px] text-surface-gray-400 sm:text-xs">
             {subtitle}
           </p>
         </div>
 
-        <span className="ml-auto text-white/50 text-lg">›</span>
+        <span className="shrink-0 text-lg text-white/50">
+          ›
+        </span>
       </div>
     </div>
   );
 }
 
+/* =========================================================
+   PROGRESS CARD
+========================================================= */
+
 function ProgressCard() {
   return (
-    <div className="w-[150px] rounded-2xl border border-white/[0.1] bg-[#111111]/95 p-4 shadow-2xl backdrop-blur-xl">
+    <div
+      className="
+        w-[150px]
+        rounded-2xl
+        border border-white/[0.10]
+        bg-[#111111]/95
+        p-4
+        shadow-[0_20px_60px_rgba(0,0,0,0.55)]
+        backdrop-blur-xl
+      "
+    >
       <div className="mb-3 flex items-center justify-between">
         <span className="text-[11px] font-semibold text-white">
           Your Progress
@@ -93,7 +154,13 @@ function ProgressCard() {
           className="h-full w-full overflow-visible"
         >
           <path
-            d="M5 50 C25 45, 28 48, 42 38 C55 28, 58 42, 70 31 C82 20, 87 30, 98 22 C110 14, 118 18, 135 5"
+            d="
+              M5 50
+              C25 45, 28 48, 42 38
+              C55 28, 58 42, 70 31
+              C82 20, 87 30, 98 22
+              C110 14, 118 18, 135 5
+            "
             fill="none"
             stroke="rgba(229,57,53,0.95)"
             strokeWidth="3"
@@ -113,14 +180,64 @@ function ProgressCard() {
   );
 }
 
+/* =========================================================
+   NUTRITION PHONE
+========================================================= */
+
 function NutritionPhone() {
   return (
-    <div className="absolute bottom-[-20px] left-[8%] z-20 rotate-[8deg]">
-      <div className="relative h-[275px] w-[155px] rounded-[26px] border-[5px] border-[#202020] bg-[#080808] shadow-[0_25px_60px_rgba(0,0,0,0.65)]">
-        {/* Phone top */}
-        <div className="absolute left-1/2 top-1 z-10 h-4 w-16 -translate-x-1/2 rounded-full bg-black" />
+    <div
+      className="
+        absolute
+        z-20
+        left-[3%]
+        bottom-[-25px]
+        rotate-[8deg]
+        sm:left-[7%]
+        lg:left-[8%]
+      "
+    >
+      <div
+        className="
+          relative
+          h-[275px]
+          w-[155px]
+          rounded-[28px]
+          border-[5px]
+          border-[#202020]
+          bg-[#080808]
+          shadow-[0_30px_70px_rgba(0,0,0,0.7)]
+          sm:h-[300px]
+          sm:w-[170px]
+          lg:h-[310px]
+          lg:w-[175px]
+        "
+      >
+        {/* Dynamic Island */}
+        <div
+          className="
+            absolute
+            left-1/2
+            top-1
+            z-10
+            h-4
+            w-16
+            -translate-x-1/2
+            rounded-full
+            bg-black
+          "
+        />
 
-        <div className="h-full overflow-hidden rounded-[20px] bg-[#0b0b0b] px-3 pt-7">
+        <div
+          className="
+            h-full
+            overflow-hidden
+            rounded-[22px]
+            bg-[#090909]
+            px-3
+            pt-7
+          "
+        >
           <div className="mb-3 flex items-center justify-between">
             <span className="text-[7px] text-white/50">
               BodyWise AI
@@ -144,8 +261,30 @@ function NutritionPhone() {
           </div>
 
           {/* Nutrition ring */}
-          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[conic-gradient(#E53935_0deg,#E53935_125deg,#22C55E_125deg,#22C55E_225deg,#3B82F6_225deg,#3B82F6_315deg,#333_315deg)]">
-            <div className="flex h-[62px] w-[62px] items-center justify-center rounded-full bg-[#0b0b0b]">
+          <div
+            className="
+              mx-auto
+              mb-4
+              flex
+              h-20
+              w-20
+              items-center
+              justify-center
+              rounded-full
+              bg-[conic-gradient(#E53935_0deg,#E53935_125deg,#22C55E_125deg,#22C55E_225deg,#3B82F6_225deg,#3B82F6_315deg,#333_315deg)]
+            "
+          >
+            <div
+              className="
+                flex
+                h-[62px]
+                w-[62px]
+                items-center
+                justify-center
+                rounded-full
+                bg-[#0b0b0b]
+              "
+            >
               <span className="text-[9px] font-bold text-white">
                 2,450
               </span>
@@ -200,47 +339,158 @@ function NutritionPhone() {
   );
 }
 
+/* =========================================================
+   HERO
+========================================================= */
+
 export default function Hero({ onSignUp }: HeroProps) {
   return (
-    <section className="relative min-h-screen overflow-hidden bg-surface-black">
-      {/* Background */}
-      <div className="absolute inset-0 bg-grid opacity-25" />
+    <section
+      className="
+        relative
+        min-h-screen
+        overflow-hidden
+        bg-surface-black
+      "
+    >
 
-      <div className="absolute left-[25%] top-[20%] h-[500px] w-[500px] rounded-full bg-brand-red/[0.05] blur-[160px]" />
+      {/* =====================================================
+          BACKGROUND
+      ===================================================== */}
 
-      <div className="absolute right-[15%] top-[25%] h-[550px] w-[550px] rounded-full bg-brand-red/[0.10] blur-[180px]" />
+      <div className="absolute inset-0 bg-grid opacity-20" />
 
-      {/* Subtle red grid glow */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.035]">
+      <div
+        className="
+          absolute
+          left-[20%]
+          top-[15%]
+          h-[450px]
+          w-[450px]
+          rounded-full
+          bg-brand-red/[0.04]
+          blur-[160px]
+        "
+      />
+
+      <div
+        className="
+          absolute
+          right-[5%]
+          top-[15%]
+          h-[600px]
+          w-[600px]
+          rounded-full
+          bg-brand-red/[0.08]
+          blur-[180px]
+        "
+      />
+
+      <div
+        className="
+          absolute
+          bottom-0
+          left-1/2
+          h-[450px]
+          w-[450px]
+          -translate-x-1/2
+          rounded-full
+          bg-brand-red/[0.035]
+          blur-[170px]
+        "
+      />
+
+      {/* subtle grid */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.025]">
         <div
           className="h-full w-full"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(229,57,53,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(229,57,53,0.6) 1px, transparent 1px)',
+              'linear-gradient(rgba(229,57,53,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(229,57,53,0.7) 1px, transparent 1px)',
             backgroundSize: '80px 80px',
           }}
         />
       </div>
 
-      {/* Main hero */}
-      <div className="relative z-10 mx-auto max-w-[1500px] px-6 pt-28 pb-10 sm:px-8 lg:px-12 lg:pt-32">
-        <div className="grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-4">
+      {/* =====================================================
+          MAIN HERO
+      ===================================================== */}
 
-          {/* LEFT CONTENT */}
-          <div className="relative z-30 max-w-2xl">
+      <div
+        className="
+          relative
+          z-10
+          mx-auto
+          max-w-[1500px]
+          px-5
+          pt-28
+          pb-10
+          sm:px-8
+          lg:px-12
+          lg:pt-32
+        "
+      >
+
+        <div
+          className="
+            grid
+            gap-8
+            lg:grid-cols-[0.92fr_1.08fr]
+            lg:items-center
+            lg:gap-2
+          "
+        >
+
+          {/* =================================================
+              LEFT CONTENT
+          ================================================= */}
+
+          <div className="relative z-40 max-w-2xl">
 
             {/* AI badge */}
-            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-brand-red/25 bg-brand-red/10 px-4 py-2">
+            <div
+              className="
+                mb-6
+                inline-flex
+                items-center
+                gap-2
+                rounded-full
+                border
+                border-brand-red/25
+                bg-brand-red/10
+                px-4
+                py-2
+              "
+            >
               <span className="h-2 w-2 animate-pulse rounded-full bg-brand-red" />
 
-              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-brand-red">
+              <span
+                className="
+                  text-[10px]
+                  font-bold
+                  uppercase
+                  tracking-[0.15em]
+                  text-brand-red
+                  sm:text-[11px]
+                "
+              >
                 AI-Powered Fitness Platform
               </span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl font-black leading-[0.98] tracking-[-0.04em] text-white sm:text-6xl lg:text-[5.2rem] xl:text-[5.8rem]">
-
+            <h1
+              className="
+                text-5xl
+                font-black
+                leading-[0.98]
+                tracking-[-0.045em]
+                text-white
+                sm:text-6xl
+                lg:text-[5rem]
+                xl:text-[5.6rem]
+              "
+            >
               Transform Your
               <br />
 
@@ -248,11 +498,32 @@ export default function Hero({ onSignUp }: HeroProps) {
               <br />
 
               <span className="relative inline-block">
-                <span className="bg-gradient-to-r from-white via-[#ffb5b3] to-brand-red bg-clip-text text-transparent">
+                <span
+                  className="
+                    bg-gradient-to-r
+                    from-white
+                    via-[#ffb5b3]
+                    to-brand-red
+                    bg-clip-text
+                    text-transparent
+                  "
+                >
                   with AI-Powered
                 </span>
 
-                <span className="absolute -bottom-2 left-0 h-[4px] w-[72%] rounded-full bg-gradient-to-r from-brand-red to-transparent" />
+                <span
+                  className="
+                    absolute
+                    -bottom-2
+                    left-0
+                    h-[4px]
+                    w-[72%]
+                    rounded-full
+                    bg-gradient-to-r
+                    from-brand-red
+                    to-transparent
+                  "
+                />
               </span>
 
               <br />
@@ -261,26 +532,79 @@ export default function Hero({ onSignUp }: HeroProps) {
             </h1>
 
             {/* Description */}
-            <p className="mt-8 max-w-xl text-base leading-7 text-surface-gray-400 sm:text-lg">
+            <p
+              className="
+                mt-7
+                max-w-xl
+                text-base
+                leading-7
+                text-surface-gray-400
+                sm:text-lg
+              "
+            >
               Personalized workouts, nutrition guidance, progress tracking,
               and intelligent fitness insights — all in one platform.
             </p>
 
-            {/* Buttons */}
-            <div className="mt-9 flex flex-col gap-4 sm:flex-row">
+            {/* CTA */}
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
 
               <button
                 onClick={onSignUp}
-                className="group inline-flex items-center justify-center gap-3 rounded-xl bg-brand-red px-7 py-4 text-base font-bold text-white shadow-[0_15px_40px_rgba(229,57,53,0.25)] transition-all duration-300 hover:scale-[1.02] hover:bg-red-500"
+                className="
+                  group
+                  inline-flex
+                  items-center
+                  justify-center
+                  gap-3
+                  rounded-xl
+                  bg-brand-red
+                  px-7
+                  py-4
+                  text-base
+                  font-bold
+                  text-white
+                  shadow-[0_15px_40px_rgba(229,57,53,0.25)]
+                  transition-all
+                  duration-300
+                  hover:scale-[1.02]
+                  hover:bg-red-500
+                "
               >
                 Start Your Transformation
 
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                <ArrowRight
+                  className="
+                    h-5
+                    w-5
+                    transition-transform
+                    group-hover:translate-x-1
+                  "
+                />
               </button>
 
               <button
                 onClick={onSignUp}
-                className="inline-flex items-center justify-center gap-3 rounded-xl border border-white/20 bg-white/[0.02] px-7 py-4 text-base font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-white/40 hover:bg-white/[0.05]"
+                className="
+                  inline-flex
+                  items-center
+                  justify-center
+                  gap-3
+                  rounded-xl
+                  border
+                  border-white/20
+                  bg-white/[0.02]
+                  px-7
+                  py-4
+                  text-base
+                  font-semibold
+                  text-white
+                  backdrop-blur-md
+                  transition-all
+                  duration-300
+                  hover:border-white/40
+                  hover:bg-white/[0.05]
+                "
               >
                 <Play className="h-4 w-4" />
 
@@ -290,63 +614,218 @@ export default function Hero({ onSignUp }: HeroProps) {
             </div>
 
             {/* Trust row */}
-            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-surface-gray-500">
+            <div
+              className="
+                mt-5
+                flex
+                flex-wrap
+                items-center
+                gap-x-4
+                gap-y-2
+                text-[10px]
+                text-surface-gray-500
+                sm:text-[11px]
+              "
+            >
               <span>No Credit Card Required</span>
+
               <span className="h-1 w-1 rounded-full bg-brand-red" />
+
               <span>7-Day Free Trial</span>
+
               <span className="h-1 w-1 rounded-full bg-brand-red" />
+
               <span>Cancel Anytime</span>
             </div>
           </div>
 
-          {/* RIGHT VISUAL */}
-          <div className="relative min-h-[480px] sm:min-h-[560px] lg:min-h-[720px]">
+          {/* =================================================
+              RIGHT VISUAL
+          ================================================= */}
 
-            {/* Main red glow */}
-            <div className="absolute left-[30%] top-[12%] h-[520px] w-[520px] rounded-full bg-brand-red/20 blur-[130px]" />
+          <div
+            className="
+              relative
+              mt-2
+              min-h-[650px]
+              sm:min-h-[700px]
+              lg:mt-0
+              lg:min-h-[720px]
+            "
+          >
 
-            {/* Circular technical rings */}
-            <div className="absolute left-[30%] top-[15%] h-[500px] w-[500px] rounded-full border border-brand-red/20" />
+            {/* =================================================
+                RED GLOW
+            ================================================= */}
 
-            <div className="absolute left-[34%] top-[19%] h-[420px] w-[420px] rounded-full border border-brand-red/15" />
-
-            <div className="absolute left-[38%] top-[23%] h-[340px] w-[340px] rounded-full border border-brand-red/10 border-dashed" />
-
-            {/* Athlete */}
             <div
-            className="absolute inset-x-[8%] bottom-0 top-[2%] -translate-x-[8%] overflow-hidden"
-            style={{
-            maskImage:
-             "radial-gradient(ellipse 95% 95% at 50% 50%, black 100%, rgba(0,0,0,0.98) 94%, transparent 100%)",
-           WebkitMaskImage:
-             "radial-gradient(ellipse 95% 95% at 50% 50%, black 100%, rgba(0,0,0,0.98) 94%, transparent 100%)",
-            }}
-      >
-            <img
-             src="/bodywise-athlete.png"
-             alt="BodyWise fitness athlete"
-             className="h-full w-full object-cover object-[55%_center]"
-             />
+              className="
+                absolute
+                left-[25%]
+                top-[10%]
+                h-[500px]
+                w-[500px]
+                rounded-full
+                bg-brand-red/15
+                blur-[130px]
+                sm:left-[28%]
+                lg:left-[25%]
+              "
+            />
 
-          <div className="absolute inset-x-0 bottom-0 h-[18%] bg-gradient-to-t from-surface-black to-transparent pointer-events-none" />
+            {/* =================================================
+                TECHNICAL RINGS
+            ================================================= */}
 
-             {/* Hide unwanted text inside the reference crop */}
-            <div className="absolute left-0 top-[12%] h-[48%] w-[38%] bg-gradient-to-r from-surface-black via-surface-black/90 to-transparent" />
+            <div
+              className="
+                pointer-events-none
+                absolute
+                left-[15%]
+                top-[9%]
+                h-[500px]
+                w-[500px]
+                rounded-full
+                border
+                border-brand-red/20
+                sm:left-[20%]
+                lg:left-[24%]
+              "
+            />
 
-            {/* Blend the right edge into the background */}
-            <div className="absolute inset-y-0 right-0 w-[28%] bg-gradient-to-l from-surface-black via-surface-black/70 to-transparent" />
+            <div
+              className="
+                pointer-events-none
+                absolute
+                left-[20%]
+                top-[14%]
+                h-[420px]
+                w-[420px]
+                rounded-full
+                border
+                border-brand-red/15
+                sm:left-[25%]
+                lg:left-[29%]
+              "
+            />
 
-            {/* Blend the lower edge */}
-             <div className="absolute bottom-0 left-0 right-0 h-[22%] bg-gradient-to-t from-surface-black via-surface-black/70 to-transparent" />
+            <div
+              className="
+                pointer-events-none
+                absolute
+                left-[25%]
+                top-[19%]
+                h-[340px]
+                w-[340px]
+                rounded-full
+                border
+                border-brand-red/10
+                border-dashed
+                sm:left-[30%]
+                lg:left-[34%]
+              "
+            />
 
-             <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-brand-red/20 mix-blend-screen" />
+            {/* =================================================
+                ATHLETE
+            ================================================= */}
 
-              {/* Red lighting */}
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-brand-red/20 mix-blend-screen" />
+            <div
+              className="
+                absolute
+                inset-x-[3%]
+                bottom-0
+                top-[2%]
+                z-10
+                overflow-hidden
+                sm:inset-x-[5%]
+                lg:inset-x-[5%]
+              "
+              style={{
+                maskImage:
+                  'radial-gradient(ellipse 82% 88% at 54% 48%, black 55%, rgba(0,0,0,0.92) 72%, transparent 100%)',
+                WebkitMaskImage:
+                  'radial-gradient(ellipse 82% 88% at 54% 48%, black 55%, rgba(0,0,0,0.92) 72%, transparent 100%)',
+              }}
+            >
+              <img
+                src="/bodywise-athlete.png"
+                alt="BodyWise fitness athlete"
+                className="
+                  h-full
+                  w-full
+                  object-cover
+                  object-[55%_center]
+                "
+              />
+
+              {/* Soft left blend — does NOT cover the slogan */}
+              <div
+                className="
+                  pointer-events-none
+                  absolute
+                  inset-y-0
+                  left-0
+                  w-[30%]
+                  bg-gradient-to-r
+                  from-surface-black/70
+                  via-surface-black/20
+                  to-transparent
+                "
+              />
+
+              {/* Soft bottom blend */}
+              <div
+                className="
+                  pointer-events-none
+                  absolute
+                  inset-x-0
+                  bottom-0
+                  h-[22%]
+                  bg-gradient-to-t
+                  from-surface-black
+                  via-surface-black/45
+                  to-transparent
+                "
+              />
+
+              {/* Soft right blend */}
+              <div
+                className="
+                  pointer-events-none
+                  absolute
+                  inset-y-0
+                  right-0
+                  w-[20%]
+                  bg-gradient-to-l
+                  from-surface-black/45
+                  to-transparent
+                "
+              />
             </div>
 
-            {/* AI ACTIVE */}
-            <div className="absolute right-[3%] top-[4%] z-30 rounded-xl border border-white/10 bg-[#111111]/90 px-4 py-3 shadow-2xl backdrop-blur-xl">
+            {/* =================================================
+                AI ACTIVE
+            ================================================= */}
+
+            <div
+              className="
+                absolute
+                right-[2%]
+                top-[1%]
+                z-40
+                rounded-2xl
+                border
+                border-white/[0.10]
+                bg-[#111111]/90
+                px-4
+                py-3
+                shadow-2xl
+                backdrop-blur-xl
+                sm:right-[4%]
+                lg:right-[3%]
+              "
+            >
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-brand-red" />
 
@@ -356,8 +835,23 @@ export default function Hero({ onSignUp }: HeroProps) {
               </div>
             </div>
 
-            {/* Workout card */}
-            <div className="absolute left-[2%] top-[15%] z-30 w-[220px] sm:w-[250px] lg:w-[270px]">
+            {/* =================================================
+                WORKOUT PLAN
+            ================================================= */}
+
+            <div
+              className="
+                absolute
+                left-[0%]
+                top-[13%]
+                z-40
+                w-[235px]
+                sm:left-[2%]
+                sm:w-[255px]
+                lg:left-[2%]
+                lg:w-[270px]
+              "
+            >
               <FloatingCard
                 icon={Dumbbell}
                 title="Workout Plan"
@@ -365,8 +859,23 @@ export default function Hero({ onSignUp }: HeroProps) {
               />
             </div>
 
-            {/* Nutrition card */}
-            <div className="absolute right-[6%] top-[28%] z-30 w-[250px] sm:w-[280px] lg:w-[300px]">
+            {/* =================================================
+                NUTRITION PLAN
+            ================================================= */}
+
+            <div
+              className="
+                absolute
+                right-[1%]
+                top-[28%]
+                z-40
+                w-[250px]
+                sm:right-[3%]
+                sm:w-[280px]
+                lg:right-[2%]
+                lg:w-[300px]
+              "
+            >
               <FloatingCard
                 icon={UtensilsCrossed}
                 title="Nutrition Plan"
@@ -374,12 +883,23 @@ export default function Hero({ onSignUp }: HeroProps) {
               />
             </div>
 
-            <div className="absolute right-[16%] top-[75%] z-30 rotate-[6deg]">
-              <ProgressCard />
-           </div>
+            {/* =================================================
+                PROGRESS TRACKING
+            ================================================= */}
 
-            {/* Progress tracking */}
-            <div className="absolute right-[0%] top-[48%] z-30 w-[250px] sm:w-[280px] lg:w-[310px]">
+            <div
+              className="
+                absolute
+                right-[0%]
+                top-[43%]
+                z-40
+                w-[250px]
+                sm:right-[1%]
+                sm:w-[275px]
+                lg:right-[1%]
+                lg:w-[270px]
+              "
+            >
               <FloatingCard
                 icon={TrendingUp}
                 title="Progress Tracking"
@@ -387,8 +907,25 @@ export default function Hero({ onSignUp }: HeroProps) {
               />
             </div>
 
-            {/* AI Coach */}
-            <div className="absolute right-[8%] top-[60%] z-30 w-[240px] sm:w-[250px] lg:right-[22%] lg:top-[57%] lg:w-[270px]">
+            {/* =================================================
+                AI COACH
+            ================================================= */}
+
+            <div
+              className="
+                absolute
+                right-[8%]
+                top-[59%]
+                z-40
+                w-[255px]
+                sm:right-[12%]
+                sm:top-[58%]
+                sm:w-[250px]
+                lg:right-[22%]
+                lg:top-[57%]
+                lg:w-[270px]
+              "
+            >
               <FloatingCard
                 icon={Brain}
                 title="AI Coach"
@@ -396,15 +933,50 @@ export default function Hero({ onSignUp }: HeroProps) {
               />
             </div>
 
-            {/* Nutrition phone */}
+            {/* =================================================
+                PROGRESS CARD
+            ================================================= */}
+
+            <div
+             className="
+             absolute
+             right-[6%]
+             bottom-[3%]
+             z-30
+             rotate-[6deg]
+             sm:right-[8%]
+             lg:right-[10%]
+             lg:bottom-[4%]
+           "
+          >
+           <ProgressCard />
+       </div>
+
+            {/* =================================================
+                NUTRITION PHONE
+            ================================================= */}
+
             <NutritionPhone />
 
           </div>
         </div>
 
-        {/* Bottom feature cards */}
-        <div className="relative z-30 mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {/* =====================================================
+            BOTTOM FEATURE CARDS
+        ===================================================== */}
 
+        <div
+          className="
+            relative
+            z-40
+            mt-4
+            grid
+            grid-cols-1
+            gap-3
+            sm:grid-cols-2
+            lg:grid-cols-4
+          "
+        >
           <FeatureCard
             icon={Activity}
             title="AI-Powered"
@@ -428,12 +1000,26 @@ export default function Hero({ onSignUp }: HeroProps) {
             title="Goal-Based"
             subtitle="Fitness Coaching"
           />
-
         </div>
+
       </div>
 
       {/* Bottom fade */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-surface-black to-transparent" />
+      <div
+        className="
+          pointer-events-none
+          absolute
+          bottom-0
+          left-0
+          right-0
+          z-50
+          h-24
+          bg-gradient-to-t
+          from-surface-black
+          to-transparent
+        "
+      />
+
     </section>
   );
 }
