@@ -2370,9 +2370,9 @@ const progressPercentage =
   </p>
 )}
 
-<div className="flex gap-3 mt-4">
-  <div>
-    <label className="text-xs text-surface-gray-400">
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+  <div className="min-w-0">
+    <label className="text-xs text-surface-gray-400 whitespace-nowrap">
       Weight (kg)
     </label>
 
@@ -2388,12 +2388,12 @@ const progressPercentage =
           [exercise.name]: e.target.value,
         }))
       }
-      className="mt-1 w-full max-w-full min-w-0 bg-surface-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white"
+      className="mt-1 w-full min-w-0 bg-surface-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white"
     />
   </div>
 
-  <div>
-    <label className="text-xs text-surface-gray-400">
+  <div className="min-w-0">
+    <label className="text-xs text-surface-gray-400 whitespace-nowrap">
       Reps Completed
     </label>
 
@@ -2408,11 +2408,10 @@ const progressPercentage =
           [exercise.name]: e.target.value,
         }))
       }
-      className="mt-1 w-32 bg-surface-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white"
+      className="mt-1 w-full min-w-0 bg-surface-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white"
     />
   </div>
 </div>
-
            </div>
 
             <div className="text-right">
