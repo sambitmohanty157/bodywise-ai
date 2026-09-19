@@ -779,7 +779,7 @@ medical_conditions: data.medical_conditions || "",
     Workout Location
   </label>
 
-  <div className="grid grid-cols-3 gap-3">
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
     {[
       { value: "gym", label: "🏋️ Gym" },
@@ -818,7 +818,7 @@ medical_conditions: data.medical_conditions || "",
     Experience Level
   </label>
 
-  <div className="grid grid-cols-3 gap-3">
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
     {[
       { value: "beginner", label: "🌱 Beginner" },
       { value: "intermediate", label: "💪 Intermediate" },
@@ -856,7 +856,7 @@ medical_conditions: data.medical_conditions || "",
     Workout Days Per Week
   </label>
 
-  <div className="grid grid-cols-5 gap-3">
+  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
     {[
       { value: "2", label: "2 Days" },
       { value: "3", label: "3 Days" },

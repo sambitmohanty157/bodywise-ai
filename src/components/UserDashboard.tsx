@@ -2388,7 +2388,7 @@ const progressPercentage =
           [exercise.name]: e.target.value,
         }))
       }
-      className="mt-1 w-32 bg-surface-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white"
+      className="mt-1 w-full max-w-full min-w-0 bg-surface-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white"
     />
   </div>
 
