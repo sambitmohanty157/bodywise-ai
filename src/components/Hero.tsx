@@ -300,7 +300,7 @@ export default function Hero({ onSignUp }: HeroProps) {
           </div>
 
           {/* RIGHT VISUAL */}
-          <div className="relative min-h-[650px] lg:min-h-[720px]">
+          <div className="relative min-h-[480px] sm:min-h-[560px] lg:min-h-[720px]">
 
             {/* Main red glow */}
             <div className="absolute left-[30%] top-[12%] h-[520px] w-[520px] rounded-full bg-brand-red/20 blur-[130px]" />
@@ -357,7 +357,7 @@ export default function Hero({ onSignUp }: HeroProps) {
             </div>
 
             {/* Workout card */}
-            <div className="absolute left-[2%] top-[15%] z-30 w-[270px]">
+            <div className="absolute left-[2%] top-[15%] z-30 w-[220px] sm:w-[250px] lg:w-[270px]">
               <FloatingCard
                 icon={Dumbbell}
                 title="Workout Plan"
@@ -366,7 +366,7 @@ export default function Hero({ onSignUp }: HeroProps) {
             </div>
 
             {/* Nutrition card */}
-            <div className="absolute right-[10%] top-[29%] z-30 w-[270px]">
+            <div className="absolute right-[6%] top-[28%] z-30 w-[250px] sm:w-[280px] lg:w-[300px]">
               <FloatingCard
                 icon={UtensilsCrossed}
                 title="Nutrition Plan"
@@ -379,7 +379,7 @@ export default function Hero({ onSignUp }: HeroProps) {
            </div>
 
             {/* Progress tracking */}
-            <div className="absolute right-[2%] top-[43%] z-30 w-[270px]">
+            <div className="absolute right-[0%] top-[48%] z-30 w-[250px] sm:w-[280px] lg:w-[310px]">
               <FloatingCard
                 icon={TrendingUp}
                 title="Progress Tracking"
@@ -388,7 +388,7 @@ export default function Hero({ onSignUp }: HeroProps) {
             </div>
 
             {/* AI Coach */}
-            <div className="absolute right-[22%] top-[57%] z-30 w-[270px]">
+            <div className="absolute right-[8%] top-[60%] z-30 w-[240px] sm:w-[250px] lg:right-[22%] lg:top-[57%] lg:w-[270px]">
               <FloatingCard
                 icon={Brain}
                 title="AI Coach"
