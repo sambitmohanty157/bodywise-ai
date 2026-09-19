@@ -726,83 +726,85 @@ export default function Hero({ onSignUp }: HeroProps) {
               "
             />
 
-            {/* =================================================
-                ATHLETE
-            ================================================= */}
+{/* =================================================
+    ATHLETE
+================================================= */}
 
-            <div
-              className="
-                absolute
-                inset-x-[3%]
-                bottom-0
-                top-[2%]
-                z-10
-                overflow-hidden
-                sm:inset-x-[5%]
-                lg:inset-x-[5%]
-              "
-              style={{
-                maskImage:
-                  'radial-gradient(ellipse 82% 88% at 54% 48%, black 55%, rgba(0,0,0,0.92) 72%, transparent 100%)',
-                WebkitMaskImage:
-                  'radial-gradient(ellipse 82% 88% at 54% 48%, black 55%, rgba(0,0,0,0.92) 72%, transparent 100%)',
-              }}
-            >
-              <img
-                src="/bodywise-athlete.png"
-                alt="BodyWise fitness athlete"
-                className="
-                  h-full
-                  w-full
-                  object-cover
-                  object-[55%_center]
-                "
-              />
+<div
+  className="
+    absolute
+    inset-x-0
+    bottom-0
+    top-0
+    z-10
+    overflow-hidden
+    lg:inset-x-[5%]
+    lg:top-[2%]
+  "
+  style={{
+    maskImage:
+      "radial-gradient(ellipse 105% 100% at 50% 45%, black 78%, rgba(0,0,0,0.92) 90%, transparent 100%)",
+    WebkitMaskImage:
+      "radial-gradient(ellipse 105% 100% at 50% 45%, black 78%, rgba(0,0,0,0.92) 90%, transparent 100%)",
+  }}
+>
+  <img
+    src="/bodywise-athlete.png"
+    alt="BodyWise fitness athlete"
+    className="
+      h-full
+      w-full
+      object-cover
+      object-[42%_8%]
+      sm:object-[52%_10%]
+      lg:object-[55%_center]
+    "
+  />
 
-              {/* Soft left blend — does NOT cover the slogan */}
-              <div
-                className="
-                  pointer-events-none
-                  absolute
-                  inset-y-0
-                  left-0
-                  w-[30%]
-                  bg-gradient-to-r
-                  from-surface-black/70
-                  via-surface-black/20
-                  to-transparent
-                "
-              />
+  {/* Left background blend */}
+  <div
+    className="
+      pointer-events-none
+      absolute
+      inset-y-0
+      left-0
+      w-[18%]
+      bg-gradient-to-r
+      from-surface-black/55
+      to-transparent
+      lg:w-[12%]
+    "
+  />
 
-              {/* Soft bottom blend */}
-              <div
-                className="
-                  pointer-events-none
-                  absolute
-                  inset-x-0
-                  bottom-0
-                  h-[22%]
-                  bg-gradient-to-t
-                  from-surface-black
-                  via-surface-black/45
-                  to-transparent
-                "
-              />
+  {/* Bottom blend */}
+  <div
+    className="
+      pointer-events-none
+      absolute
+      inset-x-0
+      bottom-0
+      h-[15%]
+      bg-gradient-to-t
+      from-surface-black
+      via-surface-black/30
+      to-transparent
+    "
+  />
 
-              {/* Soft right blend */}
-              <div
-                className="
-                  pointer-events-none
-                  absolute
-                  inset-y-0
-                  right-0
-                  w-[20%]
-                  bg-gradient-to-l
-                  from-surface-black/45
-                  to-transparent
-                "
-              />
-            </div>
+  {/* Right blend */}
+  <div
+    className="
+      pointer-events-none
+      absolute
+      inset-y-0
+      right-0
+      w-[12%]
+      bg-gradient-to-l
+      from-surface-black/45
+      to-transparent
+    "
+  />
+</div>
 
             {/* =================================================
                 AI ACTIVE
