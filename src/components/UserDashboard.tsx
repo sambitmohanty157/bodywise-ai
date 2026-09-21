@@ -246,79 +246,116 @@ if (logs) {
       ).toFixed(1)
     : '--';
 
+  const nutritionTargets = (() => {
+  if (
+    !profile?.current_weight_kg ||
+    !profile?.height_cm ||
+    !profile?.age
+  ) {
+    return {
+      calories: "--",
+      protein: "--",
+    };
+  }
+
+  const weight = Number(profile.current_weight_kg);
+  const height = Number(profile.height_cm);
+  const age = Number(profile.age);
+
+  // Calculate BMR using Mifflin-St Jeor equation
+  const bmr =
+    10 * weight +
+    6.25 * height -
+    5 * age +
+    (profile.gender?.toLowerCase() === "male" ? 5 : -161);
+
+  // Activity level
+  const activityLevel =
+    profile.activity_level?.toLowerCase() || "sedentary";
+
+  const activityMultiplier =
+    activityLevel === "sedentary"
+      ? 1.2
+      : activityLevel === "light"
+      ? 1.375
+      : activityLevel === "moderate"
+      ? 1.55
+      : activityLevel === "active"
+      ? 1.725
+      : activityLevel === "very_active" ||
+        activityLevel === "very active"
+      ? 1.9
+      : 1.2;
+
+  // Estimated maintenance calories
+  const maintenanceCalories = bmr * activityMultiplier;
+
+  // Adjust calories based on fitness goal
+  const goal =
+    profile.fitness_goal?.toLowerCase() || "maintenance";
+
   const calories =
-  profile?.current_weight_kg &&
-  profile?.height_cm &&
-  profile?.age
-    ? (() => {
-        const weight = Number(profile.current_weight_kg);
-        const height = Number(profile.height_cm);
-        const age = Number(profile.age);
+    goal === "fat_loss"
+      ? maintenanceCalories * 0.80
+      : goal === "body_recomposition"
+      ? maintenanceCalories * 0.90
+      : goal === "muscle_gain"
+      ? maintenanceCalories * 1.05
+      : maintenanceCalories;
 
-        // Calculate BMR
-        const bmr =
-          10 * weight +
-          6.25 * height -
-          5 * age +
-          (profile.gender?.toLowerCase() === "male" ? 5 : -161);
+  // Protein target
+  const proteinMultiplier =
+    goal === "fat_loss"
+      ? 2.2
+      : goal === "body_recomposition"
+      ? 2.2
+      : goal === "muscle_gain"
+      ? 2.0
+      : 1.8;
 
-        // Activity level
-        const activityLevel =
-          profile.activity_level?.toLowerCase() || "sedentary";
+  const protein = weight * proteinMultiplier;
 
-        const activityMultiplier =
-          activityLevel === "sedentary"
-            ? 1.2
-            : activityLevel === "light"
-            ? 1.375
-            : activityLevel === "moderate"
-            ? 1.55
-            : activityLevel === "active"
-            ? 1.725
-            : activityLevel === "very_active" ||
-              activityLevel === "very active"
-            ? 1.9
-            : 1.2;
+  return {
+    calories: Math.round(calories),
+    protein: Math.round(protein),
+  };
+})();
 
-        // Estimated maintenance calories
-        const maintenanceCalories = bmr * activityMultiplier;
+const calories = nutritionTargets.calories;
+const proteinTarget = nutritionTargets.protein;
 
-        // Adjust calories based on the user's goal
-        const goal =
-          profile.fitness_goal?.toLowerCase() || "maintenance";
+const today = new Date();
+today.setHours(0, 0, 0, 0);
 
-        const goalCalories =
-          goal === "fat_loss"
-            ? maintenanceCalories * 0.80
-            : goal === "body_recomposition"
-            ? maintenanceCalories * 0.90
-            : goal === "muscle_gain"
-            ? maintenanceCalories * 1.05
-            : maintenanceCalories;
+const todayFoodLogs = foodLogs.filter((log: any) => {
+  if (!log.created_at) return false;
 
-        return Math.round(goalCalories);
-      })()
-    : "--";
+  const logDate = new Date(log.created_at);
 
-    const proteinTarget =
-  profile?.current_weight_kg
-    ? (() => {
-        const weight = Number(profile.current_weight_kg);
-        const goal =
-          profile.fitness_goal?.toLowerCase() || "maintenance";
+  return logDate >= today;
+});
 
-        const proteinMultiplier =
-          goal === "fat_loss"
-            ? 2.2
-            : goal === "body_recomposition"
-            ? 2.2
-            : goal === "muscle_gain"
-            ? 2.0
-            : 1.8;
+const consumedCalories = todayFoodLogs.reduce(
+  (total: number, log: any) =>
+    total + Number(log.calories || 0),
+  0
+);
 
-        return Math.round(weight * proteinMultiplier);
-      })()
-    : '--';
+const consumedProtein = todayFoodLogs.reduce(
+  (total: number, log: any) =>
+    total + Number(log.protein || 0),
+  0
+);
+
+const remainingCalories =
+  typeof calories === "number"
+    ? Math.max(0, calories - consumedCalories)
+    : 0;
+
+const remainingProtein =
+  typeof proteinTarget === "number"
+    ? Math.max(0, proteinTarget - consumedProtein)
+    : 0;
 
 const waterIntake =
   profile?.current_weight_kg
@@ -1901,9 +1938,270 @@ const personalizedWeeklyPlan = generateWorkoutPlan(profile);
 
 console.log("PERSONALIZED WEEKLY PLAN:", personalizedWeeklyPlan);
 
+const FOOD_DATABASE = {
+  "Oats": {
+    calories: 389,
+    protein: 16.9,
+    carbs: 66.3,
+    fat: 6.9,
+    unit: "100g",
+    diet: "vegan",
+  },
 
+  "Rice": {
+    calories: 130,
+    protein: 2.7,
+    carbs: 28,
+    fat: 0.3,
+    unit: "100g cooked",
+    diet: "vegan",
+  },
 
-  // Simulate AI processing
+  "Chicken": {
+    calories: 165,
+    protein: 31,
+    carbs: 0,
+    fat: 3.6,
+    unit: "100g",
+    diet: "non_veg",
+  },
+
+  "Fish": {
+    calories: 128,
+    protein: 26,
+    carbs: 0,
+    fat: 2.7,
+    unit: "100g",
+    diet: "non_veg",
+  },
+
+  "Eggs": {
+    calories: 72,
+    protein: 6.3,
+    carbs: 0.4,
+    fat: 4.8,
+    unit: "1 egg",
+    diet: "non_veg",
+  },
+
+  "Paneer": {
+    calories: 265,
+    protein: 18.3,
+    carbs: 1.2,
+    fat: 20.8,
+    unit: "100g",
+    diet: "vegetarian",
+  },
+
+  "Tofu": {
+    calories: 76,
+    protein: 8,
+    carbs: 1.9,
+    fat: 4.8,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Dal": {
+    calories: 116,
+    protein: 9,
+    carbs: 20,
+    fat: 0.4,
+    unit: "100g cooked",
+    diet: "vegan",
+  },
+
+  "Soy Chunks": {
+    calories: 345,
+    protein: 52,
+    carbs: 33,
+    fat: 0.5,
+    unit: "100g dry",
+    diet: "vegan",
+  },
+
+  "Milk": {
+    calories: 61,
+    protein: 3.2,
+    carbs: 4.8,
+    fat: 3.3,
+    unit: "100ml",
+    diet: "vegetarian",
+  },
+
+  "Greek Yogurt": {
+    calories: 59,
+    protein: 10,
+    carbs: 3.6,
+    fat: 0.4,
+    unit: "100g",
+    diet: "vegetarian",
+  },
+
+  "Curd": {
+    calories: 61,
+    protein: 3.5,
+    carbs: 4.7,
+    fat: 3.3,
+    unit: "100g",
+    diet: "vegetarian",
+  },
+
+  "Chickpeas": {
+    calories: 164,
+    protein: 8.9,
+    carbs: 27.4,
+    fat: 2.6,
+    unit: "100g cooked",
+    diet: "vegan",
+  },
+
+  "Rajma": {
+    calories: 127,
+    protein: 8.7,
+    carbs: 22.8,
+    fat: 0.5,
+    unit: "100g cooked",
+    diet: "vegan",
+  },
+
+  "Banana": {
+    calories: 105,
+    protein: 1.3,
+    carbs: 27,
+    fat: 0.4,
+    unit: "1 medium",
+    diet: "vegan",
+  },
+
+  "Apple": {
+    calories: 95,
+    protein: 0.5,
+    carbs: 25,
+    fat: 0.3,
+    unit: "1 medium",
+    diet: "vegan",
+  },
+
+  "Peanut Butter": {
+    calories: 588,
+    protein: 25,
+    carbs: 20,
+    fat: 50,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Almonds": {
+    calories: 579,
+    protein: 21.2,
+    carbs: 21.6,
+    fat: 49.9,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Sweet Potato": {
+    calories: 86,
+    protein: 1.6,
+    carbs: 20.1,
+    fat: 0.1,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Potato": {
+    calories: 87,
+    protein: 1.9,
+    carbs: 20.1,
+    fat: 0.1,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Spinach": {
+    calories: 23,
+    protein: 2.9,
+    carbs: 3.6,
+    fat: 0.4,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Vegetables": {
+    calories: 50,
+    protein: 2,
+    carbs: 10,
+    fat: 0.5,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Salad": {
+    calories: 25,
+    protein: 1,
+    carbs: 5,
+    fat: 0.2,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Soy Milk": {
+    calories: 33,
+    protein: 3.3,
+    carbs: 0.7,
+    fat: 1.8,
+    unit: "100ml",
+    diet: "vegan",
+  },
+
+  "Soy Yogurt": {
+    calories: 55,
+    protein: 4,
+    carbs: 3,
+    fat: 2.5,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Berries": {
+    calories: 50,
+    protein: 0.7,
+    carbs: 12,
+    fat: 0.3,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Nuts": {
+    calories: 607,
+    protein: 20,
+    carbs: 22,
+    fat: 54,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Fruit": {
+    calories: 60,
+    protein: 0.8,
+    carbs: 15,
+    fat: 0.3,
+    unit: "100g",
+    diet: "vegan",
+  },
+
+  "Lentils": {
+    calories: 116,
+    protein: 9,
+    carbs: 20,
+    fat: 0.4,
+    unit: "100g cooked",
+    diet: "vegan",
+  },
+};
+
+ // Simulate AI processing
   await new Promise((resolve) => setTimeout(resolve, 3000));
 
   function generateNutritionMeals(
@@ -1911,279 +2209,839 @@ console.log("PERSONALIZED WEEKLY PLAN:", personalizedWeeklyPlan);
   calories: number | string,
   proteinTarget: number | string
 ) {
-  const goal = String(profile?.fitness_goal || "maintenance").toLowerCase();
-  const diet = String(profile?.diet_preference || "").toLowerCase();
-  const mealsPerDay = Number(profile?.meals_per_day || 3);
+  const goal = String(
+    profile?.fitness_goal || "maintenance"
+  ).toLowerCase();
 
-  const allergies = String(profile?.food_allergies || "").toLowerCase();
-  const restrictions = String(profile?.food_restrictions || "").toLowerCase();
+  const diet = String(
+    profile?.diet_preference || ""
+  ).toLowerCase();
 
-  const isVegetarian =
-    diet.includes("vegetarian") ||
-    diet.includes("veg");
+  const mealsPerDay = Math.max(
+    3,
+    Math.min(5, Number(profile?.meals_per_day || 3))
+  );
 
-  const isVegan =
-    diet.includes("vegan");
+  const allergies = String(
+    profile?.food_allergies || ""
+  ).toLowerCase();
 
+  const restrictions = String(
+    profile?.food_restrictions || ""
+  ).toLowerCase();
+
+  const dailyCalories = Number(calories) || 0;
+  const dailyProtein = Number(proteinTarget) || 0;
+
+  const normalizedDiet = diet
+  .trim()
+  .toLowerCase()
+  .replace(/[\s-]+/g, "_");
+
+const isVegan =
+  normalizedDiet === "vegan";
+
+const isVegetarian =
+  normalizedDiet === "vegetarian" ||
+  normalizedDiet === "veg";
+
+const isNonVegetarian =
+  normalizedDiet === "non_veg" ||
+  normalizedDiet === "non_vegetarian" ||
+  normalizedDiet === "nonvegetarian";
+
+  // Check whether a food should be avoided
   const avoidFood = (food: string) => {
     const text = food.toLowerCase();
 
-    return (
-      (allergies && text.includes(allergies)) ||
-      (restrictions && text.includes(restrictions))
+    const allergyList = allergies
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    const restrictionList = restrictions
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    return [...allergyList, ...restrictionList].some(
+      (item) => item && text.includes(item)
     );
   };
 
-  let meals: any[] = [];
+  const getFoodNutrition = (
+  foodName: string,
+  quantity: number
+) => {
+  const food =
+    FOOD_DATABASE[
+      foodName as keyof typeof FOOD_DATABASE
+    ];
 
-    const dailyCalories = Number(calories) || 0;
-  const dailyProtein = Number(proteinTarget) || 0;
-
-  const mealCount = Math.max(1, mealsPerDay);
-
-  const calorieDistribution =
-  mealCount === 3
-    ? [0.35, 0.40, 0.25]
-    : mealCount === 4
-    ? [0.25, 0.35, 0.15, 0.25]
-    : [0.20, 0.30, 0.15, 0.10, 0.25];
-  const proteinDistribution =
-  mealCount === 3
-    ? [0.30, 0.40, 0.30]
-    : mealCount === 4
-    ? [0.25, 0.35, 0.15, 0.25]
-    : [0.20, 0.30, 0.15, 0.10, 0.25];
-
-  // MUSCLE GAIN
-  if (
-    goal.includes("muscle") ||
-    goal.includes("gain")
-  ) {
-    if (isVegan) {
-      meals = [
-        {
-          name: "Breakfast",
-          foods: ["Oats", "Soy Milk", "Banana", "Peanut Butter"],
-        },
-        {
-          name: "Lunch",
-          foods: ["Rice", "Tofu", "Lentils", "Vegetables"],
-        },
-        {
-          name: "Snack",
-          foods: ["Soy Yogurt", "Fruit", "Nuts"],
-        },
-        {
-          name: "Dinner",
-          foods: ["Tofu", "Rice", "Vegetables", "Lentils"],
-        },
-      ];
-    } else if (isVegetarian) {
-      meals = [
-        {
-          name: "Breakfast",
-          foods: ["Oats", "Milk", "Banana", "Peanut Butter"],
-        },
-        {
-          name: "Lunch",
-          foods: ["Rice", "Paneer", "Dal", "Vegetables"],
-        },
-        {
-          name: "Snack",
-          foods: ["Greek Yogurt", "Fruit", "Nuts"],
-        },
-        {
-          name: "Dinner",
-          foods: ["Paneer", "Rice", "Vegetables", "Curd"],
-        },
-      ];
-    } else {
-      meals = [
-        {
-          name: "Breakfast",
-          foods: ["Oats", "Eggs", "Banana", "Peanut Butter"],
-        },
-        {
-          name: "Lunch",
-          foods: ["Chicken", "Rice", "Vegetables"],
-        },
-        {
-          name: "Snack",
-          foods: ["Greek Yogurt", "Fruit", "Nuts"],
-        },
-        {
-          name: "Dinner",
-          foods: ["Fish", "Sweet Potato", "Salad"],
-        },
-      ];
-    }
+  if (!food) {
+    return {
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+    };
   }
 
-  // FAT LOSS
-  else if (
-    goal.includes("fat") ||
-    goal.includes("loss") ||
-    goal.includes("weight loss")
-  ) {
-    if (isVegan) {
-      meals = [
-        {
-          name: "Breakfast",
-          foods: ["Oats", "Soy Milk", "Berries"],
-        },
-        {
-          name: "Lunch",
-          foods: ["Tofu", "Rice", "Vegetables", "Salad"],
-        },
-        {
-          name: "Snack",
-          foods: ["Soy Yogurt", "Fruit"],
-        },
-        {
-          name: "Dinner",
-          foods: ["Lentils", "Vegetables", "Salad"],
-        },
-      ];
-    } else if (isVegetarian) {
-      meals = [
-        {
-          name: "Breakfast",
-          foods: ["Oats", "Greek Yogurt", "Berries"],
-        },
-        {
-          name: "Lunch",
-          foods: ["Paneer", "Rice", "Vegetables", "Salad"],
-        },
-        {
-          name: "Snack",
-          foods: ["Greek Yogurt", "Fruit"],
-        },
-        {
-          name: "Dinner",
-          foods: ["Dal", "Vegetables", "Salad", "Curd"],
-        },
-      ];
-    } else {
-      meals = [
-        {
-          name: "Breakfast",
-          foods: ["Eggs", "Oats", "Fruit"],
-        },
-        {
-          name: "Lunch",
-          foods: ["Chicken", "Rice", "Vegetables", "Salad"],
-        },
-        {
-          name: "Snack",
-          foods: ["Greek Yogurt", "Fruit"],
-        },
-        {
-          name: "Dinner",
-          foods: ["Fish", "Vegetables", "Salad"],
-        },
-      ];
-    }
-  }
+  const isSingleServing =
+    food.unit === "1 egg" ||
+    food.unit === "1 medium";
 
-  // MAINTENANCE
-  else {
-    if (isVegan) {
-      meals = [
-        {
-          name: "Breakfast",
-          foods: ["Oats", "Soy Milk", "Banana"],
-        },
-        {
-          name: "Lunch",
-          foods: ["Rice", "Tofu", "Vegetables"],
-        },
-        {
-          name: "Snack",
-          foods: ["Soy Yogurt", "Fruit"],
-        },
-        {
-          name: "Dinner",
-          foods: ["Lentils", "Rice", "Salad"],
-        },
-      ];
-    } else if (isVegetarian) {
-      meals = [
-        {
-          name: "Breakfast",
-          foods: ["Oats", "Milk", "Banana"],
-        },
-        {
-          name: "Lunch",
-          foods: ["Paneer", "Rice", "Vegetables"],
-        },
-        {
-          name: "Snack",
-          foods: ["Greek Yogurt", "Fruit"],
-        },
-        {
-          name: "Dinner",
-          foods: ["Dal", "Rice", "Salad", "Curd"],
-        },
-      ];
-    } else {
-      meals = [
-        {
-          name: "Breakfast",
-          foods: ["Oats", "Eggs", "Banana"],
-        },
-        {
-          name: "Lunch",
-          foods: ["Chicken", "Rice", "Vegetables"],
-        },
-        {
-          name: "Snack",
-          foods: ["Greek Yogurt", "Fruit"],
-        },
-        {
-          name: "Dinner",
-          foods: ["Fish", "Sweet Potato", "Salad"],
-        },
-      ];
-    }
-  }
+  const multiplier = isSingleServing
+    ? quantity
+    : quantity / 100;
 
-  // Remove foods mentioned in allergies/restrictions
-  meals = meals.map((meal) => ({
-    ...meal,
-    foods: meal.foods.filter(
-      (food: string) => !avoidFood(food)
+  return {
+    calories: Math.round(
+      food.calories * multiplier
     ),
-  }));
+    protein: Number(
+      (food.protein * multiplier).toFixed(1)
+    ),
+    carbs: Number(
+      (food.carbs * multiplier).toFixed(1)
+    ),
+    fat: Number(
+      (food.fat * multiplier).toFixed(1)
+    ),
+  };
+};
 
-  // Adjust number of meals
-  if (mealsPerDay <= 3) {
-    meals = meals.slice(0, 3);
-  } else if (mealsPerDay === 4) {
-    meals = meals.slice(0, 4);
-  } else if (mealsPerDay >= 5) {
-    meals = [
-      ...meals.slice(0, 3),
+  // Get nutrition for a quantity
+  const calculateFood = (
+    name: string,
+    quantity: number,
+    unit: string
+  ) => {
+    const nutrition = getFoodNutrition(
+      name,
+      quantity
+    );
+
+    return {
+      name,
+      quantity,
+      unit,
+      calories: nutrition.calories,
+      protein: nutrition.protein,
+      carbs: nutrition.carbs,
+      fat: nutrition.fat,
+    };
+  };
+
+  /*
+   * Base meal templates.
+   *
+   * Quantities are starting portions.
+   * The final meal calories/protein are calculated
+   * from these actual quantities.
+   */
+
+  let mealTemplates: {
+    name: string;
+    foods: {
+      name: string;
+      quantity: number;
+      unit: string;
+    }[];
+  }[] = [];
+
+  // -----------------------------
+  // VEGAN
+  // -----------------------------
+  if (isVegan) {
+    mealTemplates = [
       {
-        name: "Pre/Post Workout",
-        foods: isVegan
-          ? ["Soy Milk", "Banana"]
-          : isVegetarian
-          ? ["Greek Yogurt", "Banana"]
-          : ["Greek Yogurt", "Banana"],
+        name: "Breakfast",
+        foods: [
+          {
+            name: "Oats",
+            quantity: 60,
+            unit: "g",
+          },
+          {
+            name: "Soy Milk",
+            quantity: 250,
+            unit: "ml",
+          },
+          {
+            name: "Banana",
+            quantity: 1,
+            unit: "medium",
+          },
+        ],
       },
-      meals[3],
+      {
+        name: "Lunch",
+        foods: [
+          {
+            name: "Rice",
+            quantity: 180,
+            unit: "g cooked",
+          },
+          {
+            name: "Tofu",
+            quantity: 180,
+            unit: "g",
+          },
+          {
+            name: "Dal",
+            quantity: 150,
+            unit: "g cooked",
+          },
+          {
+            name: "Vegetables",
+            quantity: 150,
+            unit: "g",
+          },
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          {
+            name: "Soy Yogurt",
+            quantity: 200,
+            unit: "g",
+          },
+          {
+            name: "Apple",
+            quantity: 1,
+            unit: "medium",
+          },
+          {
+            name: "Almonds",
+            quantity: 20,
+            unit: "g",
+          },
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          {
+            name: "Soy Chunks",
+            quantity: 60,
+            unit: "g dry",
+          },
+          {
+            name: "Rice",
+            quantity: 150,
+            unit: "g cooked",
+          },
+          {
+            name: "Vegetables",
+            quantity: 200,
+            unit: "g",
+          },
+        ],
+      },
     ];
   }
 
-   return meals.map((meal, index) => ({
-  ...meal,
-  calories: Math.round(
-    dailyCalories * (calorieDistribution[index] || 0)
-  ),
-  protein: Math.round(
-    dailyProtein * (proteinDistribution[index] || 0)
-  ),
-}));
+  // -----------------------------
+  // VEGETARIAN
+  // -----------------------------
+  else if (isVegetarian) {
+    mealTemplates = [
+      {
+        name: "Breakfast",
+        foods: [
+          {
+            name: "Oats",
+            quantity: 60,
+            unit: "g",
+          },
+          {
+            name: "Milk",
+            quantity: 250,
+            unit: "ml",
+          },
+          {
+            name: "Banana",
+            quantity: 1,
+            unit: "medium",
+          },
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          {
+            name: "Rice",
+            quantity: 180,
+            unit: "g cooked",
+          },
+          {
+            name: "Paneer",
+            quantity: 150,
+            unit: "g",
+          },
+          {
+            name: "Dal",
+            quantity: 150,
+            unit: "g cooked",
+          },
+          {
+            name: "Vegetables",
+            quantity: 150,
+            unit: "g",
+          },
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          {
+            name: "Greek Yogurt",
+            quantity: 200,
+            unit: "g",
+          },
+          {
+            name: "Apple",
+            quantity: 1,
+            unit: "medium",
+          },
+          {
+            name: "Almonds",
+            quantity: 20,
+            unit: "g",
+          },
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          {
+            name: "Paneer",
+            quantity: 120,
+            unit: "g",
+          },
+          {
+            name: "Rice",
+            quantity: 150,
+            unit: "g cooked",
+          },
+          {
+            name: "Vegetables",
+            quantity: 200,
+            unit: "g",
+          },
+          {
+            name: "Curd",
+            quantity: 150,
+            unit: "g",
+          },
+        ],
+      },
+    ];
+  }
+
+  // -----------------------------
+  // NON-VEGETARIAN
+  // -----------------------------
+  else {
+    mealTemplates = [
+      {
+        name: "Breakfast",
+        foods: [
+          {
+            name: "Oats",
+            quantity: 60,
+            unit: "g",
+          },
+          {
+            name: "Eggs",
+            quantity: 3,
+            unit: "eggs",
+          },
+          {
+            name: "Banana",
+            quantity: 1,
+            unit: "medium",
+          },
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          {
+            name: "Chicken",
+            quantity: 150,
+            unit: "g",
+          },
+          {
+            name: "Rice",
+            quantity: 180,
+            unit: "g cooked",
+          },
+          {
+            name: "Vegetables",
+            quantity: 150,
+            unit: "g",
+          },
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          {
+            name: "Greek Yogurt",
+            quantity: 200,
+            unit: "g",
+          },
+          {
+            name: "Apple",
+            quantity: 1,
+            unit: "medium",
+          },
+          {
+            name: "Almonds",
+            quantity: 20,
+            unit: "g",
+          },
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          {
+            name: "Fish",
+            quantity: 150,
+            unit: "g",
+          },
+          {
+            name: "Sweet Potato",
+            quantity: 200,
+            unit: "g",
+          },
+          {
+            name: "Salad",
+            quantity: 150,
+            unit: "g",
+          },
+        ],
+      },
+    ];
+  }
+
+  // -----------------------------
+  // REMOVE ALLERGIES / RESTRICTIONS
+  // -----------------------------
+  mealTemplates = mealTemplates.map((meal) => ({
+    ...meal,
+    foods: meal.foods.filter(
+      (food) => !avoidFood(food.name)
+    ),
+  }));
+
+  // -----------------------------
+  // ADD 5TH MEAL
+  // -----------------------------
+  if (mealsPerDay >= 5) {
+    mealTemplates.splice(3, 0, {
+      name: "Pre/Post Workout",
+      foods: isVegan
+        ? [
+            {
+              name: "Soy Milk",
+              quantity: 250,
+              unit: "ml",
+            },
+            {
+              name: "Banana",
+              quantity: 1,
+              unit: "medium",
+            },
+          ]
+        : isVegetarian
+        ? [
+            {
+              name: "Greek Yogurt",
+              quantity: 200,
+              unit: "g",
+            },
+            {
+              name: "Banana",
+              quantity: 1,
+              unit: "medium",
+            },
+          ]
+        : [
+            {
+              name: "Greek Yogurt",
+              quantity: 200,
+              unit: "g",
+            },
+            {
+              name: "Banana",
+              quantity: 1,
+              unit: "medium",
+            },
+          ],
+    });
+  }
+
+  // -----------------------------
+  // LIMIT MEAL COUNT
+  // -----------------------------
+  const selectedMeals =
+    mealTemplates.slice(0, mealsPerDay);
+
+  // -----------------------------
+  // CALCULATE ACTUAL NUTRITION
+  // -----------------------------
+  let meals = selectedMeals.map((meal) => {
+    const foods = meal.foods.map((food) =>
+      calculateFood(
+        food.name,
+        food.quantity,
+        food.unit
+      )
+    );
+
+    const mealCalories = foods.reduce(
+      (sum, food) => sum + food.calories,
+      0
+    );
+
+    const mealProtein = foods.reduce(
+      (sum, food) => sum + food.protein,
+      0
+    );
+
+    const mealCarbs = foods.reduce(
+      (sum, food) => sum + food.carbs,
+      0
+    );
+
+    const mealFat = foods.reduce(
+      (sum, food) => sum + food.fat,
+      0
+    );
+
+    return {
+      name: meal.name,
+      foods,
+      calories: Math.round(mealCalories),
+      protein: Number(mealProtein.toFixed(1)),
+      carbs: Number(mealCarbs.toFixed(1)),
+      fat: Number(mealFat.toFixed(1)),
+    };
+  });
+  /*
+   * SMART NUTRITION TARGET BALANCING
+   *
+   * Adjust individual food quantities so the complete
+   * day's nutrition gets as close as possible to the
+   * user's calorie and protein targets.
+   */
+
+  const targetCalories =
+    dailyCalories > 0 ? dailyCalories : 2000;
+
+  const targetProtein =
+    dailyProtein > 0 ? dailyProtein : 120;
+
+  const getDailyTotals = (plan: any[]) => {
+    return plan.reduce(
+      (totals, meal) => {
+        meal.foods.forEach((food: any) => {
+          totals.calories += food.calories || 0;
+          totals.protein += food.protein || 0;
+        });
+
+        return totals;
+      },
+      {
+        calories: 0,
+        protein: 0,
+      }
+    );
+  };
+
+  const calculateFoodWithQuantity = (
+    food: any,
+    quantity: number
+  ) => {
+    const nutrition = calculateFood(
+      food.name,
+      quantity,
+      food.unit
+    );
+
+    return {
+      ...food,
+      quantity,
+      calories: nutrition.calories,
+      protein: nutrition.protein,
+      carbs: nutrition.carbs,
+      fat: nutrition.fat,
+    };
+  };
+
+  /*
+   * Foods that are useful for increasing protein.
+   */
+  const proteinFoods = [
+    "Chicken",
+    "Fish",
+    "Eggs",
+    "Paneer",
+    "Tofu",
+    "Soy Chunks",
+    "Greek Yogurt",
+    "Soy Yogurt",
+    "Dal",
+    "Lentils",
+  ];
+
+  /*
+   * Foods where reducing the portion can lower
+   * calories without removing too much protein.
+   */
+  const calorieFoods = [
+    "Rice",
+    "Oats",
+    "Almonds",
+    "Nuts",
+    "Peanut Butter",
+    "Sweet Potato",
+    "Potato",
+    "Banana",
+  ];
+
+  const getAdjustmentStep = (food: any) => {
+    if (
+      food.unit === "medium" ||
+      food.unit === "eggs"
+    ) {
+      return 1;
+    }
+
+    return 5;
+  };
+
+  /*
+   * Score the current plan.
+   *
+   * Protein is given slightly higher importance because
+   * protein is a key BodyWise coaching target.
+   */
+  const calculateScore = (
+    caloriesValue: number,
+    proteinValue: number
+  ) => {
+    const calorieError =
+      Math.abs(
+        caloriesValue - targetCalories
+      ) / targetCalories;
+
+    const proteinError =
+      Math.abs(
+        proteinValue - targetProtein
+      ) / targetProtein;
+
+    return (
+      calorieError * 0.45 +
+      proteinError * 0.55
+    );
+  };
+
+  /*
+   * Iteratively test small quantity changes.
+   *
+   * Each iteration looks for the change that gives
+   * the best overall calorie + protein result.
+   */
+  for (let iteration = 0; iteration < 60; iteration++) {
+    const currentTotals =
+      getDailyTotals(meals);
+
+    const currentScore =
+      calculateScore(
+        currentTotals.calories,
+        currentTotals.protein
+      );
+
+    let bestScore = currentScore;
+    let bestMealIndex = -1;
+    let bestFoodIndex = -1;
+    let bestQuantity = 0;
+
+    meals.forEach(
+      (meal: any, mealIndex: number) => {
+        meal.foods.forEach(
+          (food: any, foodIndex: number) => {
+            const step =
+              getAdjustmentStep(food);
+
+            const quantitiesToTest = [
+              food.quantity + step,
+              food.quantity - step,
+            ];
+
+            quantitiesToTest.forEach(
+              (newQuantity) => {
+                /*
+                 * Never allow a food quantity to
+                 * become zero or negative.
+                 */
+                if (newQuantity <= 0) {
+                  return;
+                }
+
+                /*
+                 * Avoid excessively large portions.
+                 */
+                if (
+                  food.unit !== "medium" &&
+                  food.unit !== "eggs" &&
+                  newQuantity > 500
+                ) {
+                  return;
+                }
+
+                if (
+                  (food.unit === "medium" ||
+                    food.unit === "eggs") &&
+                  newQuantity > 6
+                ) {
+                  return;
+                }
+
+                const newFood =
+                  calculateFoodWithQuantity(
+                    food,
+                    newQuantity
+                  );
+
+                const testMeals =
+                  meals.map(
+                    (
+                      testMeal: any,
+                      testMealIndex: number
+                    ) => ({
+                      ...testMeal,
+                      foods:
+                        testMeal.foods.map(
+                          (
+                            testFood: any,
+                            testFoodIndex: number
+                          ) =>
+                            testMealIndex ===
+                              mealIndex &&
+                            testFoodIndex ===
+                              foodIndex
+                              ? newFood
+                              : testFood
+                        ),
+                    })
+                  );
+
+                const testTotals =
+                  getDailyTotals(testMeals);
+
+                const testScore =
+                  calculateScore(
+                    testTotals.calories,
+                    testTotals.protein
+                  );
+
+                if (testScore < bestScore) {
+                  bestScore = testScore;
+                  bestMealIndex =
+                    mealIndex;
+                  bestFoodIndex =
+                    foodIndex;
+                  bestQuantity =
+                    newQuantity;
+                }
+              }
+            );
+          }
+        );
+      }
+    );
+
+    /*
+     * Stop when no individual food adjustment
+     * can improve the result.
+     */
+    if (
+      bestMealIndex === -1 ||
+      bestFoodIndex === -1
+    ) {
+      break;
+    }
+
+    const selectedFood =
+      meals[bestMealIndex]
+        .foods[bestFoodIndex];
+
+    meals[bestMealIndex].foods[
+      bestFoodIndex
+    ] = calculateFoodWithQuantity(
+      selectedFood,
+      bestQuantity
+    );
+  }
+
+  /*
+   * Recalculate final meal nutrition after all
+   * quantity adjustments.
+   */
+  meals = meals.map((meal: any) => {
+    const caloriesTotal =
+      meal.foods.reduce(
+        (sum: number, food: any) =>
+          sum + food.calories,
+        0
+      );
+
+    const proteinTotal =
+      meal.foods.reduce(
+        (sum: number, food: any) =>
+          sum + food.protein,
+        0
+      );
+
+    const carbsTotal =
+      meal.foods.reduce(
+        (sum: number, food: any) =>
+          sum + food.carbs,
+        0
+      );
+
+    const fatTotal =
+      meal.foods.reduce(
+        (sum: number, food: any) =>
+          sum + food.fat,
+        0
+      );
+
+    return {
+      ...meal,
+      calories: Math.round(
+        caloriesTotal
+      ),
+      protein: Number(
+        proteinTotal.toFixed(1)
+      ),
+      carbs: Number(
+        carbsTotal.toFixed(1)
+      ),
+      fat: Number(
+        fatTotal.toFixed(1)
+      ),
+    };
+  });
+
+  return meals;
 }
 
   // Temporary dummy plan
@@ -2505,6 +3363,36 @@ const progressPercentage =
     🥗 Today's Nutrition
   </h3>
 
+  <div className="grid grid-cols-2 gap-3 mb-6">
+  <div className="rounded-xl bg-surface-gray-800/70 border border-white/10 p-4">
+    <p className="text-xs text-surface-gray-400">
+      Calories
+    </p>
+
+    <p className="text-xl font-bold text-white mt-1">
+      {totalCalories} / {calories} kcal
+    </p>
+
+    <p className="text-xs text-surface-gray-500 mt-1">
+      {Math.max(0, Number(calories) - Number(totalCalories))} kcal remaining
+    </p>
+  </div>
+
+  <div className="rounded-xl bg-surface-gray-800/70 border border-white/10 p-4">
+    <p className="text-xs text-surface-gray-400">
+      Protein
+    </p>
+
+    <p className="text-xl font-bold text-white mt-1">
+      {totalProtein} / {proteinTarget} g
+    </p>
+
+    <p className="text-xs text-surface-gray-500 mt-1">
+      {Math.max(0, Number(proteinTarget) - Number(totalProtein)).toFixed(1)} g remaining
+    </p>
+  </div>
+</div>
+
  <div className="space-y-5 mt-6">
     {aiPlan?.plan_json?.nutrition?.meals?.map(
       (meal: any, index: number) => (
@@ -2513,9 +3401,16 @@ const progressPercentage =
             {meal.name}
           </p>
 
-          <p className="text-lg font-bold text-white">
-            {meal.foods.join(" + ")}
-          </p>
+          <div className="flex flex-wrap gap-2">
+  {meal.foods.map((food: any, foodIndex: number) => (
+    <span
+      key={foodIndex}
+      className="inline-flex items-center rounded-lg bg-surface-gray-800 border border-white/10 px-3 py-1.5 text-sm text-white"
+    >
+      {food.name} — {food.quantity} {food.unit}
+    </span>
+  ))}
+</div>
 
           <p className="text-sm text-surface-gray-400 mt-1">
             {meal.calories} kcal • {meal.protein}g protein
@@ -2820,14 +3715,18 @@ const progressPercentage =
   <div>
     <div className="flex justify-between text-sm mb-1">
       <span>🔥 Calories</span>
-      <span>{totalCalories} / 2200 kcal</span>
+      <span>{totalCalories} / {calories} kcal</span>
     </div>
 
     <div className="w-full bg-gray-700 rounded-full h-2">
       <div
         className="bg-red-500 h-2 rounded-full"
         style={{
-          width: `${Math.min((totalCalories / 2200) * 100, 100)}%`,
+          width: `${
+  typeof calories === "number"
+    ? Math.min((totalCalories / calories) * 100, 100)
+    : 0
+}%`,
         }}
       />
     </div>
@@ -2837,14 +3736,18 @@ const progressPercentage =
   <div>
     <div className="flex justify-between text-sm mb-1">
       <span>💪 Protein</span>
-      <span>{totalProtein} / 200 g</span>
+      <span>{totalProtein} / {proteinTarget} g</span>
     </div>
 
     <div className="w-full bg-gray-700 rounded-full h-2">
       <div
         className="bg-green-500 h-2 rounded-full"
         style={{
-          width: `${Math.min((totalProtein / 200) * 100, 100)}%`,
+          width: `${
+  typeof proteinTarget === "number"
+    ? Math.min((totalProtein / proteinTarget) * 100, 100)
+    : 0
+}%`,
         }}
       />
     </div>

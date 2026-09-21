@@ -755,7 +755,7 @@ export default function Hero({ onSignUp }: HeroProps) {
       h-full
       w-full
       object-cover
-      object-[42%_8%]
+      object-[62%_42%]
       sm:object-[52%_10%]
       lg:object-[55%_center]
     "
@@ -971,10 +971,10 @@ export default function Hero({ onSignUp }: HeroProps) {
           className="
             relative
             z-40
-            mt-4
+            mt-14 sm:mt-4
             grid
             grid-cols-1
-            gap-3
+            gap-2x
             sm:grid-cols-2
             lg:grid-cols-4
           "
