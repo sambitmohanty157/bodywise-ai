@@ -373,6 +373,11 @@ const todayWorkout =
     (day: any) => day.day === todayName
   );
 
+const todayNutrition =
+  aiPlan?.plan_json?.nutrition?.weekly_plan?.find(
+    (day: any) => day.day === todayName
+  );
+
   const recoveryPlan = generateRecoveryPlan(profile);
 
     const goalProgress =
@@ -2209,13 +2214,10 @@ const FOOD_DATABASE = {
   calories: number | string,
   proteinTarget: number | string
 ) {
-  const goal = String(
-    profile?.fitness_goal || "maintenance"
-  ).toLowerCase();
-
-  const diet = String(
-    profile?.diet_preference || ""
-  ).toLowerCase();
+  const diet = String(profile?.diet_preference || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[\s-]+/g, "_");
 
   const mealsPerDay = Math.max(
     3,
@@ -2230,27 +2232,17 @@ const FOOD_DATABASE = {
     profile?.food_restrictions || ""
   ).toLowerCase();
 
-  const dailyCalories = Number(calories) || 0;
-  const dailyProtein = Number(proteinTarget) || 0;
+  const dailyCalories = Number(calories) || 2000;
+  const dailyProtein = Number(proteinTarget) || 120;
 
-  const normalizedDiet = diet
-  .trim()
-  .toLowerCase()
-  .replace(/[\s-]+/g, "_");
+  const isVegan = diet === "vegan";
+  const isVegetarian =
+    diet === "vegetarian" || diet === "veg";
 
-const isVegan =
-  normalizedDiet === "vegan";
+  // Non-vegetarian users can eat BOTH vegetarian
+  // and non-vegetarian foods.
 
-const isVegetarian =
-  normalizedDiet === "vegetarian" ||
-  normalizedDiet === "veg";
 
-const isNonVegetarian =
-  normalizedDiet === "non_veg" ||
-  normalizedDiet === "non_vegetarian" ||
-  normalizedDiet === "nonvegetarian";
-
-  // Check whether a food should be avoided
   const avoidFood = (food: string) => {
     const text = food.toLowerCase();
 
@@ -2269,779 +2261,687 @@ const isNonVegetarian =
     );
   };
 
-  const getFoodNutrition = (
-  foodName: string,
-  quantity: number
-) => {
-  const food =
-    FOOD_DATABASE[
-      foodName as keyof typeof FOOD_DATABASE
-    ];
-
-  if (!food) {
-    return {
-      calories: 0,
-      protein: 0,
-      carbs: 0,
-      fat: 0,
-    };
-  }
-
-  const isSingleServing =
-    food.unit === "1 egg" ||
-    food.unit === "1 medium";
-
-  const multiplier = isSingleServing
-    ? quantity
-    : quantity / 100;
-
-  return {
-    calories: Math.round(
-      food.calories * multiplier
-    ),
-    protein: Number(
-      (food.protein * multiplier).toFixed(1)
-    ),
-    carbs: Number(
-      (food.carbs * multiplier).toFixed(1)
-    ),
-    fat: Number(
-      (food.fat * multiplier).toFixed(1)
-    ),
-  };
-};
-
-  // Get nutrition for a quantity
   const calculateFood = (
     name: string,
     quantity: number,
     unit: string
   ) => {
-    const nutrition = getFoodNutrition(
-      name,
-      quantity
-    );
+    const food =
+      FOOD_DATABASE[
+        name as keyof typeof FOOD_DATABASE
+      ];
+
+    if (!food) {
+      return {
+        name,
+        quantity,
+        unit,
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+      };
+    }
+
+    const isSingleServing =
+      food.unit === "1 egg" ||
+      food.unit === "1 medium";
+
+    const multiplier = isSingleServing
+      ? quantity
+      : quantity / 100;
 
     return {
       name,
       quantity,
       unit,
-      calories: nutrition.calories,
-      protein: nutrition.protein,
-      carbs: nutrition.carbs,
-      fat: nutrition.fat,
-    };
-  };
-
-  /*
-   * Base meal templates.
-   *
-   * Quantities are starting portions.
-   * The final meal calories/protein are calculated
-   * from these actual quantities.
-   */
-
-  let mealTemplates: {
-    name: string;
-    foods: {
-      name: string;
-      quantity: number;
-      unit: string;
-    }[];
-  }[] = [];
-
-  // -----------------------------
-  // VEGAN
-  // -----------------------------
-  if (isVegan) {
-    mealTemplates = [
-      {
-        name: "Breakfast",
-        foods: [
-          {
-            name: "Oats",
-            quantity: 60,
-            unit: "g",
-          },
-          {
-            name: "Soy Milk",
-            quantity: 250,
-            unit: "ml",
-          },
-          {
-            name: "Banana",
-            quantity: 1,
-            unit: "medium",
-          },
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          {
-            name: "Rice",
-            quantity: 180,
-            unit: "g cooked",
-          },
-          {
-            name: "Tofu",
-            quantity: 180,
-            unit: "g",
-          },
-          {
-            name: "Dal",
-            quantity: 150,
-            unit: "g cooked",
-          },
-          {
-            name: "Vegetables",
-            quantity: 150,
-            unit: "g",
-          },
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          {
-            name: "Soy Yogurt",
-            quantity: 200,
-            unit: "g",
-          },
-          {
-            name: "Apple",
-            quantity: 1,
-            unit: "medium",
-          },
-          {
-            name: "Almonds",
-            quantity: 20,
-            unit: "g",
-          },
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          {
-            name: "Soy Chunks",
-            quantity: 60,
-            unit: "g dry",
-          },
-          {
-            name: "Rice",
-            quantity: 150,
-            unit: "g cooked",
-          },
-          {
-            name: "Vegetables",
-            quantity: 200,
-            unit: "g",
-          },
-        ],
-      },
-    ];
-  }
-
-  // -----------------------------
-  // VEGETARIAN
-  // -----------------------------
-  else if (isVegetarian) {
-    mealTemplates = [
-      {
-        name: "Breakfast",
-        foods: [
-          {
-            name: "Oats",
-            quantity: 60,
-            unit: "g",
-          },
-          {
-            name: "Milk",
-            quantity: 250,
-            unit: "ml",
-          },
-          {
-            name: "Banana",
-            quantity: 1,
-            unit: "medium",
-          },
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          {
-            name: "Rice",
-            quantity: 180,
-            unit: "g cooked",
-          },
-          {
-            name: "Paneer",
-            quantity: 150,
-            unit: "g",
-          },
-          {
-            name: "Dal",
-            quantity: 150,
-            unit: "g cooked",
-          },
-          {
-            name: "Vegetables",
-            quantity: 150,
-            unit: "g",
-          },
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          {
-            name: "Greek Yogurt",
-            quantity: 200,
-            unit: "g",
-          },
-          {
-            name: "Apple",
-            quantity: 1,
-            unit: "medium",
-          },
-          {
-            name: "Almonds",
-            quantity: 20,
-            unit: "g",
-          },
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          {
-            name: "Paneer",
-            quantity: 120,
-            unit: "g",
-          },
-          {
-            name: "Rice",
-            quantity: 150,
-            unit: "g cooked",
-          },
-          {
-            name: "Vegetables",
-            quantity: 200,
-            unit: "g",
-          },
-          {
-            name: "Curd",
-            quantity: 150,
-            unit: "g",
-          },
-        ],
-      },
-    ];
-  }
-
-  // -----------------------------
-  // NON-VEGETARIAN
-  // -----------------------------
-  else {
-    mealTemplates = [
-      {
-        name: "Breakfast",
-        foods: [
-          {
-            name: "Oats",
-            quantity: 60,
-            unit: "g",
-          },
-          {
-            name: "Eggs",
-            quantity: 3,
-            unit: "eggs",
-          },
-          {
-            name: "Banana",
-            quantity: 1,
-            unit: "medium",
-          },
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          {
-            name: "Chicken",
-            quantity: 150,
-            unit: "g",
-          },
-          {
-            name: "Rice",
-            quantity: 180,
-            unit: "g cooked",
-          },
-          {
-            name: "Vegetables",
-            quantity: 150,
-            unit: "g",
-          },
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          {
-            name: "Greek Yogurt",
-            quantity: 200,
-            unit: "g",
-          },
-          {
-            name: "Apple",
-            quantity: 1,
-            unit: "medium",
-          },
-          {
-            name: "Almonds",
-            quantity: 20,
-            unit: "g",
-          },
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          {
-            name: "Fish",
-            quantity: 150,
-            unit: "g",
-          },
-          {
-            name: "Sweet Potato",
-            quantity: 200,
-            unit: "g",
-          },
-          {
-            name: "Salad",
-            quantity: 150,
-            unit: "g",
-          },
-        ],
-      },
-    ];
-  }
-
-  // -----------------------------
-  // REMOVE ALLERGIES / RESTRICTIONS
-  // -----------------------------
-  mealTemplates = mealTemplates.map((meal) => ({
-    ...meal,
-    foods: meal.foods.filter(
-      (food) => !avoidFood(food.name)
-    ),
-  }));
-
-  // -----------------------------
-  // ADD 5TH MEAL
-  // -----------------------------
-  if (mealsPerDay >= 5) {
-    mealTemplates.splice(3, 0, {
-      name: "Pre/Post Workout",
-      foods: isVegan
-        ? [
-            {
-              name: "Soy Milk",
-              quantity: 250,
-              unit: "ml",
-            },
-            {
-              name: "Banana",
-              quantity: 1,
-              unit: "medium",
-            },
-          ]
-        : isVegetarian
-        ? [
-            {
-              name: "Greek Yogurt",
-              quantity: 200,
-              unit: "g",
-            },
-            {
-              name: "Banana",
-              quantity: 1,
-              unit: "medium",
-            },
-          ]
-        : [
-            {
-              name: "Greek Yogurt",
-              quantity: 200,
-              unit: "g",
-            },
-            {
-              name: "Banana",
-              quantity: 1,
-              unit: "medium",
-            },
-          ],
-    });
-  }
-
-  // -----------------------------
-  // LIMIT MEAL COUNT
-  // -----------------------------
-  const selectedMeals =
-    mealTemplates.slice(0, mealsPerDay);
-
-  // -----------------------------
-  // CALCULATE ACTUAL NUTRITION
-  // -----------------------------
-  let meals = selectedMeals.map((meal) => {
-    const foods = meal.foods.map((food) =>
-      calculateFood(
-        food.name,
-        food.quantity,
-        food.unit
-      )
-    );
-
-    const mealCalories = foods.reduce(
-      (sum, food) => sum + food.calories,
-      0
-    );
-
-    const mealProtein = foods.reduce(
-      (sum, food) => sum + food.protein,
-      0
-    );
-
-    const mealCarbs = foods.reduce(
-      (sum, food) => sum + food.carbs,
-      0
-    );
-
-    const mealFat = foods.reduce(
-      (sum, food) => sum + food.fat,
-      0
-    );
-
-    return {
-      name: meal.name,
-      foods,
-      calories: Math.round(mealCalories),
-      protein: Number(mealProtein.toFixed(1)),
-      carbs: Number(mealCarbs.toFixed(1)),
-      fat: Number(mealFat.toFixed(1)),
-    };
-  });
-  /*
-   * SMART NUTRITION TARGET BALANCING
-   *
-   * Adjust individual food quantities so the complete
-   * day's nutrition gets as close as possible to the
-   * user's calorie and protein targets.
-   */
-
-  const targetCalories =
-    dailyCalories > 0 ? dailyCalories : 2000;
-
-  const targetProtein =
-    dailyProtein > 0 ? dailyProtein : 120;
-
-  const getDailyTotals = (plan: any[]) => {
-    return plan.reduce(
-      (totals, meal) => {
-        meal.foods.forEach((food: any) => {
-          totals.calories += food.calories || 0;
-          totals.protein += food.protein || 0;
-        });
-
-        return totals;
-      },
-      {
-        calories: 0,
-        protein: 0,
-      }
-    );
-  };
-
-  const calculateFoodWithQuantity = (
-    food: any,
-    quantity: number
-  ) => {
-    const nutrition = calculateFood(
-      food.name,
-      quantity,
-      food.unit
-    );
-
-    return {
-      ...food,
-      quantity,
-      calories: nutrition.calories,
-      protein: nutrition.protein,
-      carbs: nutrition.carbs,
-      fat: nutrition.fat,
-    };
-  };
-
-  /*
-   * Foods that are useful for increasing protein.
-   */
-  const proteinFoods = [
-    "Chicken",
-    "Fish",
-    "Eggs",
-    "Paneer",
-    "Tofu",
-    "Soy Chunks",
-    "Greek Yogurt",
-    "Soy Yogurt",
-    "Dal",
-    "Lentils",
-  ];
-
-  /*
-   * Foods where reducing the portion can lower
-   * calories without removing too much protein.
-   */
-  const calorieFoods = [
-    "Rice",
-    "Oats",
-    "Almonds",
-    "Nuts",
-    "Peanut Butter",
-    "Sweet Potato",
-    "Potato",
-    "Banana",
-  ];
-
-  const getAdjustmentStep = (food: any) => {
-    if (
-      food.unit === "medium" ||
-      food.unit === "eggs"
-    ) {
-      return 1;
-    }
-
-    return 5;
-  };
-
-  /*
-   * Score the current plan.
-   *
-   * Protein is given slightly higher importance because
-   * protein is a key BodyWise coaching target.
-   */
-  const calculateScore = (
-    caloriesValue: number,
-    proteinValue: number
-  ) => {
-    const calorieError =
-      Math.abs(
-        caloriesValue - targetCalories
-      ) / targetCalories;
-
-    const proteinError =
-      Math.abs(
-        proteinValue - targetProtein
-      ) / targetProtein;
-
-    return (
-      calorieError * 0.45 +
-      proteinError * 0.55
-    );
-  };
-
-  /*
-   * Iteratively test small quantity changes.
-   *
-   * Each iteration looks for the change that gives
-   * the best overall calorie + protein result.
-   */
-  for (let iteration = 0; iteration < 60; iteration++) {
-    const currentTotals =
-      getDailyTotals(meals);
-
-    const currentScore =
-      calculateScore(
-        currentTotals.calories,
-        currentTotals.protein
-      );
-
-    let bestScore = currentScore;
-    let bestMealIndex = -1;
-    let bestFoodIndex = -1;
-    let bestQuantity = 0;
-
-    meals.forEach(
-      (meal: any, mealIndex: number) => {
-        meal.foods.forEach(
-          (food: any, foodIndex: number) => {
-            const step =
-              getAdjustmentStep(food);
-
-            const quantitiesToTest = [
-              food.quantity + step,
-              food.quantity - step,
-            ];
-
-            quantitiesToTest.forEach(
-              (newQuantity) => {
-                /*
-                 * Never allow a food quantity to
-                 * become zero or negative.
-                 */
-                if (newQuantity <= 0) {
-                  return;
-                }
-
-                /*
-                 * Avoid excessively large portions.
-                 */
-                if (
-                  food.unit !== "medium" &&
-                  food.unit !== "eggs" &&
-                  newQuantity > 500
-                ) {
-                  return;
-                }
-
-                if (
-                  (food.unit === "medium" ||
-                    food.unit === "eggs") &&
-                  newQuantity > 6
-                ) {
-                  return;
-                }
-
-                const newFood =
-                  calculateFoodWithQuantity(
-                    food,
-                    newQuantity
-                  );
-
-                const testMeals =
-                  meals.map(
-                    (
-                      testMeal: any,
-                      testMealIndex: number
-                    ) => ({
-                      ...testMeal,
-                      foods:
-                        testMeal.foods.map(
-                          (
-                            testFood: any,
-                            testFoodIndex: number
-                          ) =>
-                            testMealIndex ===
-                              mealIndex &&
-                            testFoodIndex ===
-                              foodIndex
-                              ? newFood
-                              : testFood
-                        ),
-                    })
-                  );
-
-                const testTotals =
-                  getDailyTotals(testMeals);
-
-                const testScore =
-                  calculateScore(
-                    testTotals.calories,
-                    testTotals.protein
-                  );
-
-                if (testScore < bestScore) {
-                  bestScore = testScore;
-                  bestMealIndex =
-                    mealIndex;
-                  bestFoodIndex =
-                    foodIndex;
-                  bestQuantity =
-                    newQuantity;
-                }
-              }
-            );
-          }
-        );
-      }
-    );
-
-    /*
-     * Stop when no individual food adjustment
-     * can improve the result.
-     */
-    if (
-      bestMealIndex === -1 ||
-      bestFoodIndex === -1
-    ) {
-      break;
-    }
-
-    const selectedFood =
-      meals[bestMealIndex]
-        .foods[bestFoodIndex];
-
-    meals[bestMealIndex].foods[
-      bestFoodIndex
-    ] = calculateFoodWithQuantity(
-      selectedFood,
-      bestQuantity
-    );
-  }
-
-  /*
-   * Recalculate final meal nutrition after all
-   * quantity adjustments.
-   */
-  meals = meals.map((meal: any) => {
-    const caloriesTotal =
-      meal.foods.reduce(
-        (sum: number, food: any) =>
-          sum + food.calories,
-        0
-      );
-
-    const proteinTotal =
-      meal.foods.reduce(
-        (sum: number, food: any) =>
-          sum + food.protein,
-        0
-      );
-
-    const carbsTotal =
-      meal.foods.reduce(
-        (sum: number, food: any) =>
-          sum + food.carbs,
-        0
-      );
-
-    const fatTotal =
-      meal.foods.reduce(
-        (sum: number, food: any) =>
-          sum + food.fat,
-        0
-      );
-
-    return {
-      ...meal,
-      calories: Math.round(
-        caloriesTotal
-      ),
+      calories: Math.round(food.calories * multiplier),
       protein: Number(
-        proteinTotal.toFixed(1)
+        (food.protein * multiplier).toFixed(1)
       ),
       carbs: Number(
-        carbsTotal.toFixed(1)
+        (food.carbs * multiplier).toFixed(1)
       ),
       fat: Number(
-        fatTotal.toFixed(1)
+        (food.fat * multiplier).toFixed(1)
       ),
     };
-  });
+  };
 
-  return meals;
+  const vegetarianMeals = [
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Milk", 250, "ml"],
+          ["Banana", 1, "medium"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Rice", 180, "g cooked"],
+          ["Paneer", 150, "g"],
+          ["Dal", 150, "g cooked"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Greek Yogurt", 200, "g"],
+          ["Apple", 1, "medium"],
+          ["Almonds", 20, "g"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Paneer", 120, "g"],
+          ["Rice", 150, "g cooked"],
+          ["Vegetables", 200, "g"],
+          ["Curd", 150, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Greek Yogurt", 200, "g"],
+          ["Banana", 1, "medium"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Rice", 180, "g cooked"],
+          ["Chickpeas", 180, "g cooked"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Curd", 200, "g"],
+          ["Apple", 1, "medium"],
+          ["Almonds", 20, "g"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Paneer", 150, "g"],
+          ["Sweet Potato", 200, "g"],
+          ["Salad", 150, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Milk", 250, "ml"],
+          ["Apple", 1, "medium"],
+          ["Almonds", 15, "g"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Rice", 180, "g cooked"],
+          ["Rajma", 180, "g cooked"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Greek Yogurt", 200, "g"],
+          ["Banana", 1, "medium"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Paneer", 150, "g"],
+          ["Dal", 150, "g cooked"],
+          ["Salad", 150, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Soy Milk", 250, "ml"],
+          ["Berries", 100, "g"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Rice", 180, "g cooked"],
+          ["Tofu", 180, "g"],
+          ["Dal", 150, "g cooked"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Greek Yogurt", 200, "g"],
+          ["Apple", 1, "medium"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Paneer", 120, "g"],
+          ["Sweet Potato", 200, "g"],
+          ["Salad", 150, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Milk", 250, "ml"],
+          ["Banana", 1, "medium"],
+          ["Peanut Butter", 15, "g"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Rice", 180, "g cooked"],
+          ["Dal", 200, "g cooked"],
+          ["Paneer", 120, "g"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Curd", 200, "g"],
+          ["Apple", 1, "medium"],
+          ["Almonds", 15, "g"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Tofu", 200, "g"],
+          ["Rice", 150, "g cooked"],
+          ["Vegetables", 200, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Greek Yogurt", 200, "g"],
+          ["Berries", 100, "g"],
+          ["Almonds", 15, "g"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Rice", 180, "g cooked"],
+          ["Rajma", 180, "g cooked"],
+          ["Paneer", 100, "g"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Milk", 250, "ml"],
+          ["Banana", 1, "medium"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Paneer", 150, "g"],
+          ["Sweet Potato", 200, "g"],
+          ["Salad", 150, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Milk", 250, "ml"],
+          ["Apple", 1, "medium"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Rice", 180, "g cooked"],
+          ["Chickpeas", 180, "g cooked"],
+          ["Paneer", 120, "g"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Greek Yogurt", 200, "g"],
+          ["Banana", 1, "medium"],
+          ["Almonds", 15, "g"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Tofu", 180, "g"],
+          ["Rice", 150, "g cooked"],
+          ["Vegetables", 200, "g"],
+        ],
+      },
+    ],
+  ];
+
+  const nonVegetarianMeals = [
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Eggs", 3, "eggs"],
+          ["Banana", 1, "medium"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Chicken", 150, "g"],
+          ["Rice", 180, "g cooked"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Greek Yogurt", 200, "g"],
+          ["Apple", 1, "medium"],
+          ["Almonds", 20, "g"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Fish", 150, "g"],
+          ["Sweet Potato", 200, "g"],
+          ["Salad", 150, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Eggs", 3, "eggs"],
+          ["Apple", 1, "medium"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Chicken", 150, "g"],
+          ["Rice", 180, "g cooked"],
+          ["Dal", 150, "g cooked"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Greek Yogurt", 200, "g"],
+          ["Banana", 1, "medium"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Fish", 160, "g"],
+          ["Rice", 150, "g cooked"],
+          ["Salad", 150, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Milk", 250, "ml"],
+          ["Eggs", 2, "eggs"],
+          ["Banana", 1, "medium"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Rice", 180, "g cooked"],
+          ["Chicken", 150, "g"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Greek Yogurt", 200, "g"],
+          ["Almonds", 20, "g"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Paneer", 120, "g"],
+          ["Fish", 120, "g"],
+          ["Salad", 150, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Greek Yogurt", 200, "g"],
+          ["Banana", 1, "medium"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Chicken", 170, "g"],
+          ["Rice", 180, "g cooked"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Milk", 250, "ml"],
+          ["Apple", 1, "medium"],
+          ["Almonds", 15, "g"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Fish", 150, "g"],
+          ["Sweet Potato", 200, "g"],
+          ["Salad", 150, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Eggs", 3, "eggs"],
+          ["Apple", 1, "medium"],
+          ["Milk", 200, "ml"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Chicken", 150, "g"],
+          ["Rice", 180, "g cooked"],
+          ["Dal", 150, "g cooked"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Greek Yogurt", 200, "g"],
+          ["Banana", 1, "medium"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Paneer", 100, "g"],
+          ["Fish", 150, "g"],
+          ["Salad", 150, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Eggs", 2, "eggs"],
+          ["Greek Yogurt", 150, "g"],
+          ["Banana", 1, "medium"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Rice", 180, "g cooked"],
+          ["Chicken", 170, "g"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Milk", 250, "ml"],
+          ["Apple", 1, "medium"],
+          ["Almonds", 15, "g"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Fish", 160, "g"],
+          ["Rice", 150, "g cooked"],
+          ["Salad", 150, "g"],
+        ],
+      },
+    ],
+
+    [
+      {
+        name: "Breakfast",
+        foods: [
+          ["Oats", 60, "g"],
+          ["Eggs", 3, "eggs"],
+          ["Banana", 1, "medium"],
+        ],
+      },
+      {
+        name: "Lunch",
+        foods: [
+          ["Chicken", 150, "g"],
+          ["Rice", 180, "g cooked"],
+          ["Chickpeas", 120, "g cooked"],
+          ["Vegetables", 150, "g"],
+        ],
+      },
+      {
+        name: "Snack",
+        foods: [
+          ["Greek Yogurt", 200, "g"],
+          ["Apple", 1, "medium"],
+          ["Almonds", 15, "g"],
+        ],
+      },
+      {
+        name: "Dinner",
+        foods: [
+          ["Fish", 150, "g"],
+          ["Sweet Potato", 200, "g"],
+          ["Salad", 150, "g"],
+        ],
+      },
+    ],
+  ];
+
+  // Vegan users get only vegan foods.
+  // Vegetarian users get vegetarian foods.
+  // Non-vegetarian users can receive both veg and non-veg meals.
+  const weeklyTemplates = isVegan
+    ? vegetarianMeals.map((day) =>
+        day.map((meal) => ({
+          ...meal,
+          foods: meal.foods.filter(
+            (food: any) =>
+              ["Oats", "Soy Milk", "Banana", "Rice", "Tofu",
+               "Dal", "Vegetables", "Soy Yogurt", "Apple",
+               "Almonds", "Soy Chunks", "Sweet Potato",
+               "Salad", "Chickpeas", "Rajma", "Berries",
+               "Nuts", "Peanut Butter", "Lentils"]
+                .includes(food[0])
+          ),
+        }))
+      )
+    : isVegetarian
+    ? vegetarianMeals
+    : nonVegetarianMeals.map((day, dayIndex) => {
+        // Non-vegetarian users get a mixture of
+        // vegetarian and non-vegetarian meals.
+        if (dayIndex % 2 === 1) {
+          return day.map((meal, mealIndex) => ({
+            ...meal,
+            foods:
+              mealIndex === 0 || mealIndex === 2
+                ? vegetarianMeals[dayIndex][mealIndex].foods
+                : meal.foods,
+          }));
+        }
+
+        return day;
+      });
+
+  const dayNames = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+
+  const weeklyPlan = weeklyTemplates.map(
+    (dayTemplate, dayIndex) => {
+      let selectedMeals = dayTemplate
+        .map((meal: any) => ({
+          ...meal,
+          foods: meal.foods.filter(
+            (food: any) => !avoidFood(food[0])
+          ),
+        }))
+        .slice(0, mealsPerDay);
+
+      if (mealsPerDay >= 5) {
+        selectedMeals.splice(3, 0, {
+          name: "Pre/Post Workout",
+          foods: isVegan
+            ? [
+                ["Soy Milk", 250, "ml"],
+                ["Banana", 1, "medium"],
+              ]
+            : [
+                ["Greek Yogurt", 200, "g"],
+                ["Banana", 1, "medium"],
+              ],
+        });
+      }
+
+      const meals = selectedMeals.map((meal: any) => {
+        const foods = meal.foods.map((food: any[]) =>
+          calculateFood(
+            food[0],
+            food[1],
+            food[2]
+          )
+        );
+
+        const mealCalories = foods.reduce(
+          (sum: number, food: any) =>
+            sum + food.calories,
+          0
+        );
+
+        const mealProtein = foods.reduce(
+          (sum: number, food: any) =>
+            sum + food.protein,
+          0
+        );
+
+        const mealCarbs = foods.reduce(
+          (sum: number, food: any) =>
+            sum + food.carbs,
+          0
+        );
+
+        const mealFat = foods.reduce(
+          (sum: number, food: any) =>
+            sum + food.fat,
+          0
+        );
+
+        return {
+          name: meal.name,
+          foods,
+          calories: Math.round(mealCalories),
+          protein: Number(
+            mealProtein.toFixed(1)
+          ),
+          carbs: Number(
+            mealCarbs.toFixed(1)
+          ),
+          fat: Number(
+            mealFat.toFixed(1)
+          ),
+        };
+      });
+
+      return {
+        day: dayNames[dayIndex],
+        meals,
+        target_calories: dailyCalories,
+        target_protein: dailyProtein,
+      };
+    }
+  );
+
+  return weeklyPlan;
 }
 
   // Temporary dummy plan
@@ -3058,21 +2958,19 @@ const isNonVegetarian =
   workout: {
     weekly_plan: personalizedWeeklyPlan,
 },
+nutrition: {
+  daily_targets: {
+    calories,
+    protein: proteinTarget,
+    water: waterIntake,
+  },
 
-  nutrition: {
-    daily_targets: {
-      calories,
-      protein: proteinTarget,
-      water: waterIntake,
-    },
-
-      meals: generateNutritionMeals(
+  weekly_plan: generateNutritionMeals(
     profile,
     calories,
     proteinTarget
   ),
-  
-  },
+},
 
   recovery: {
     sleep_target: "7-9 hours",
@@ -3394,7 +3292,7 @@ const progressPercentage =
 </div>
 
  <div className="space-y-5 mt-6">
-    {aiPlan?.plan_json?.nutrition?.meals?.map(
+    {todayNutrition?.meals?.map(
       (meal: any, index: number) => (
         <div key={index}>
           <p className="text-sm text-surface-gray-400 mb-1">
