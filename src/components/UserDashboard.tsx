@@ -3170,7 +3170,7 @@ const progressPercentage =
 
 {/* Personal AI Coach */}
 
-<div className="mb-8 rounded-3xl border border-red-500/20 bg-gradient-to-br from-red-500/10 via-surface-gray-900 to-surface-black p-8 shadow-xl">
+<div className="mb-8 rounded-3xl border border-red-500/20 bg-gradient-to-br from-red-500/10 via-surface-gray-900 to-surface-black p-2 sm:p-8 shadow-xl">
 
   <div className="flex flex-col gap-8">
 
@@ -3187,7 +3187,7 @@ const progressPercentage =
       {aiPlan && (
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 
-    <div className="rounded-2xl bg-surface-gray-900 border border-white/10 p-6">
+    <div className="w-full rounded-2xl bg-surface-gray-900 border border-white/10 p-6">
 
   <h3 className="text-2xl font-bold mb-5">
     🏋️ Today's Workout
@@ -3204,7 +3204,7 @@ const progressPercentage =
 </p>
 
   {todayWorkout?.exercises?.length ? (
-  <div className="space-y-3">
+  <div className="space-y-3 w-full">
     {todayWorkout.exercises.map(
       (exercise: any, index: number) => (
         <div

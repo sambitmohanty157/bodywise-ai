@@ -14,6 +14,11 @@ import ProfileSetup from './components/ProfileSetup';
 import { supabase } from './lib/supabase';
 import type { User } from '@supabase/supabase-js';
 import UserDashboard from './components/UserDashboard';
+import RefundPolicy from './RefundPolicy';
+import PrivacyPolicy from './PrivacyPolicy';
+import AboutUs from './AboutUs';
+import Contact from './Contact';
+import TermsOfService from './TermsOfService';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -21,6 +26,11 @@ export default function App() {
   const [authDefaultTab, setAuthDefaultTab] = useState<'login' | 'signup'>('signup');
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [showRefundPolicy, setShowRefundPolicy] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showAboutUs, setShowAboutUs] = useState(false);
+  const [showContact, setShowContact] = useState(false);
+  const [showTermsOfService, setShowTermsOfService] = useState(false);
 
   useEffect(() => {
     if (!supabase) return;
@@ -46,9 +56,44 @@ export default function App() {
       await supabase.auth.signOut();
     }
   }
-  
+ 
+  if (showRefundPolicy) {
+  return <RefundPolicy onBack={() => setShowRefundPolicy(false)} />;
+}
+
+if (showPrivacyPolicy) {
+  return <PrivacyPolicy onBack={() => setShowPrivacyPolicy(false)} />;
+}
+
+if (showAboutUs) {
+  return <AboutUs onBack={() => setShowAboutUs(false)} />;
+}
+
+if (showContact) {
+  return <Contact onBack={() => setShowContact(false)} />;
+}
+
+if (showTermsOfService) {
+  return (
+    <TermsOfService
+      onBack={() => setShowTermsOfService(false)}
+    />
+  );
+}
+
  if (showDashboard) {
-  return <UserDashboard user={user} />;
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setShowDashboard(false)}
+        className="fixed top-5 left-5 z-50 flex items-center gap-2 px-4 py-2.5 bg-surface-gray-900/90 border border-white/[0.08] rounded-lg text-sm font-semibold text-white hover:bg-surface-gray-800 transition-all backdrop-blur-md"
+      >
+        ← Back to Home
+      </button>
+
+      <UserDashboard user={user} />
+    </div>
+  );
 }
 
   if (showProfileSetup) {
@@ -80,7 +125,14 @@ export default function App() {
       <Transformations />
       <Pricing />
       <Testimonials />
-      <Footer />
+      <Footer
+      onRefundPolicy={() => setShowRefundPolicy(true)}
+      onPrivacyPolicy={() => setShowPrivacyPolicy(true)}
+      onAboutUs={() => setShowAboutUs(true)}
+      onContact={() => setShowContact(true)}
+      onTermsOfService={() => setShowTermsOfService(true)}
+      onDashboard={() => setShowDashboard(true)}
+/>
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => {

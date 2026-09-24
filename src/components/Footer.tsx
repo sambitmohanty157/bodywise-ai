@@ -1,10 +1,14 @@
 import { Zap, Twitter, Instagram, Youtube, Linkedin, ArrowRight } from 'lucide-react';
 
 const footerLinks = {
-  Product: ['Features', 'Pricing', 'Dashboard', 'Mobile App', 'Integrations'],
-  Resources: ['Blog', 'Workout Library', 'Nutrition Guide', 'Help Center', 'API Docs'],
-  Company: ['About Us', 'Careers', 'Press', 'Contact', 'Partners'],
-  Legal: ['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'GDPR'],
+  Product: ['Features', 'Pricing', 'Dashboard'],
+  Resources: ['Workout Library', 'Nutrition Guide'],
+  Company: ['About Us', 'Contact'],
+ Legal: [
+  'Privacy Policy',
+  'Terms of Service',
+  'Refund & Cancellation Policy',
+],
 };
 
 const socials = [
@@ -14,7 +18,21 @@ const socials = [
   { icon: Linkedin, label: 'LinkedIn' },
 ];
 
-export default function Footer() {
+export default function Footer({ 
+  onRefundPolicy, 
+  onPrivacyPolicy, 
+  onAboutUs, 
+  onContact, 
+  onTermsOfService,
+  onDashboard,
+}: { 
+  onRefundPolicy?: () => void; 
+  onPrivacyPolicy?: () => void; 
+  onAboutUs?: () => void; 
+  onContact?: () => void; 
+  onTermsOfService?: () => void;
+  onDashboard?: () => void;
+}) {  
   return (
     <footer className="relative pt-24 pb-8 overflow-hidden">
       <div className="absolute inset-0 bg-surface-gray-950" />
@@ -78,15 +96,54 @@ export default function Footer() {
               <h4 className="text-sm font-bold mb-5 text-white uppercase tracking-wider">{title}</h4>
               <ul className="flex flex-col gap-3">
                 {links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
-                      className="text-sm text-surface-gray-500 hover:text-white transition-colors duration-200"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
+  <li key={link}>
+    <a
+  
+  href="#"
+      onClick={(e) => {
+        if (link === 'Dashboard') {
+  e.preventDefault();
+  onDashboard?.();
+}
+  if (link === 'Refund & Cancellation Policy') {
+    e.preventDefault();
+    onRefundPolicy?.();
+  }
+
+  if (link === 'Privacy Policy') {
+    e.preventDefault();
+    onPrivacyPolicy?.();
+  }
+
+  if (link === 'About Us') {
+    e.preventDefault();
+    onAboutUs?.();
+  }
+
+  if (link === 'Contact') {
+  e.preventDefault();
+  onContact?.();
+}
+
+if (link === 'Terms of Service') {
+  e.preventDefault();
+  onTermsOfService?.();
+}
+
+if (link === 'Pricing') {
+  e.preventDefault();
+  document.getElementById('pricing')?.scrollIntoView({
+    behavior: 'smooth',
+  });
+}
+
+}}
+      className="text-sm text-surface-gray-500 hover:text-white transition-colors duration-200"
+    >
+      {link}
+    </a>
+  </li>
+))}
               </ul>
             </div>
           ))}
