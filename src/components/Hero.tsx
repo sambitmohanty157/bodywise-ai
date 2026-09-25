@@ -981,7 +981,7 @@ export default function Hero({ onSignUp }: HeroProps) {
         >
           <FeatureCard
             icon={Activity}
-            title="AI-Powered"
+            title="AI-Powered"    
             subtitle="Workout Plans"
           />
 

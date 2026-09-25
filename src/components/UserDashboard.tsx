@@ -39,54 +39,89 @@ export default function UserDashboard({ user }: UserDashboardProps) {
   const [exerciseWeights, setExerciseWeights] = useState<Record<string, string>>({});
   const [exerciseReps, setExerciseReps] = useState<Record<string, string>>({});
 
-const autoFillFood = async (food: string) => {
-  if (!food) return;
+  const autoFillFood = async (food: string) => {
+  if (!food.trim()) {
+    alert("Please enter a food name.");
+    return;
+  }
 
   try {
-    const data = await searchFood(food);
+    const data = await searchFood(food.trim());
 
-    if (data.foods && data.foods.length > 0) {
-      const item = data.foods[0];
+    console.log("USDA RESPONSE:", data);
 
-      const qty = Math.max(1, Number(quantity) || 100);
-      const multiplier = qty / 100;
-      console.log("FIRST FOOD:", item);
-      
-      const nutrients = item.foodNutrients || [];
-
-const getNutrient = (...names: string[]) => {
-  const nutrient = nutrients.find(
-    (n: any) => names.includes(n.nutrientName)
-  );
-  return nutrient?.value || 0;
-};
-
-const calories =
-  getNutrient('Energy', 'Energy (Atwater General)') * multiplier;
-
-const protein =
-  getNutrient('Protein') * multiplier;
-
-const carbs =
-  getNutrient(
-    'Carbohydrate, by difference',
-    'Carbohydrate'
-  ) * multiplier;
-
-const fat =
-  getNutrient(
-    'Total lipid (fat)',
-    'Total Fat'
-  ) * multiplier;
-
-setCaloriesInput(String(Math.round(calories)));
-setProteinInput(protein.toFixed(1));
-setCarbsInput(carbs.toFixed(1));
-setFatInput(fat.toFixed(1));
-   
+    if (!data?.foods || data.foods.length === 0) {
+      alert(`No nutrition data found for "${food}".`);
+      return;
     }
+
+    const item = data.foods[0];
+
+    console.log("FIRST FOOD:", item);
+
+    const qty = Math.max(1, Number(quantity) || 100);
+    const multiplier = qty / 100;
+
+    const nutrients = item.foodNutrients || [];
+
+    const getNutrient = (...names: string[]) => {
+      const nutrient = nutrients.find((n: any) => {
+        const nutrientName = String(n.nutrientName || "")
+          .trim()
+          .toLowerCase();
+
+        return names.some(
+          (name) =>
+            nutrientName === name.toLowerCase() ||
+            nutrientName.includes(name.toLowerCase())
+        );
+      });
+
+      return Number(nutrient?.value) || 0;
+    };
+
+    const calories =
+      getNutrient(
+        "Energy",
+        "Energy (Atwater General)",
+        "Energy (Atwater Specific Factors)"
+      ) * multiplier;
+
+    const protein =
+      getNutrient("Protein") * multiplier;
+
+    const carbs =
+      getNutrient(
+        "Carbohydrate, by difference",
+        "Carbohydrate"
+      ) * multiplier;
+
+    const fat =
+      getNutrient(
+        "Total lipid (fat)",
+        "Total Fat",
+        "Fat"
+      ) * multiplier;
+
+    console.log("CALCULATED NUTRITION:", {
+      calories,
+      protein,
+      carbs,
+      fat,
+      quantity: qty,
+    });
+
+    setCaloriesInput(String(Math.round(calories)));
+    setProteinInput(protein.toFixed(1));
+    setCarbsInput(carbs.toFixed(1));
+    setFatInput(fat.toFixed(1));
+
   } catch (error) {
-    console.error(error);
+    console.error("AUTO FILL ERROR:", error);
+
+    alert(
+      "Unable to fetch nutrition data. Please check your USDA API key or internet connection."
+    );
   }
 };
   
