@@ -950,7 +950,8 @@ const loadFoodLogs = async () => {
 };
 function generateExercisesForWorkout(
   workoutType: string,
-  profile: any
+  profile: any,
+  legFocus: "quad" | "hamstring" = "quad"
 ) {
   const experience = profile?.experience_level || "beginner";
   const location = profile?.workout_location || "gym";
@@ -972,208 +973,76 @@ function generateExercisesForWorkout(
   // =========================================================
 
   if (workoutType === "Push") {
-    if (location === "home") {
-      exercises = [
-        {
-          name: "Push-Ups",
-          sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
-          reps: isMuscleGain ? "8-12" : "10-15",
-          rest: isAdvanced ? "75 sec" : "60 sec",
-        },
-        {
-          name: "Incline Push-Ups",
-          sets: 3,
-          reps: "10-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Pike Push-Ups",
-          sets: isAdvanced ? 3 : 2,
-          reps: "8-12",
-          rest: "75 sec",
-        },
-        {
-          name: "Chair Tricep Dips",
-          sets: 3,
-          reps: "10-15",
-          rest: "60 sec",
-        },
-      ];
-    } else {
-      exercises = [
-        {
-          name: "Bench Press",
-          sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
-          reps: isMuscleGain ? "6-10" : "8-12",
-          rest: isAdvanced ? "120 sec" : "90 sec",
-        },
-        {
-          name: "Incline Dumbbell Press",
-          sets: isAdvanced ? 4 : 3,
-          reps: "8-12",
-          rest: "75 sec",
-        },
-        {
-          name: "Lateral Raises",
-          sets: 3,
-          reps: "12-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Tricep Pushdowns",
-          sets: 3,
-          reps: "10-15",
-          rest: "60 sec",
-        },
-      ];
-    }
-  }
-
-  // =========================================================
-  // PULL
-  // =========================================================
-
-  else if (workoutType === "Pull") {
-    if (location === "home") {
-      exercises = [
-        {
-          name: "Resistance Band Rows",
-          sets: isAdvanced ? 4 : 3,
-          reps: "10-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Resistance Band Pulldowns",
-          sets: 3,
-          reps: "10-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Band Face Pulls",
-          sets: 3,
-          reps: "12-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Dumbbell Curls",
-          sets: 3,
-          reps: "10-15",
-          rest: "60 sec",
-        },
-      ];
-    } else {
-      exercises = [
-        {
-          name: "Lat Pulldown",
-          sets: isBeginner ? 3 : 4,
-          reps: "8-12",
-          rest: isAdvanced ? "120 sec" : "90 sec",
-        },
-        {
-          name: "Seated Cable Row",
-          sets: isAdvanced ? 4 : 3,
-          reps: "8-12",
-          rest: "75 sec",
-        },
-        {
-          name: "Face Pull",
-          sets: 3,
-          reps: "12-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Dumbbell Curl",
-          sets: 3,
-          reps: "10-12",
-          rest: "60 sec",
-        },
-      ];
-    }
-  }
-
-  // =========================================================
-  // LEGS
-  // =========================================================
-
-  else if (workoutType === "Legs") {
-    if (location === "home") {
-      exercises = [
-        {
-          name: "Bodyweight Squats",
-          sets: isAdvanced ? 4 : 3,
-          reps: "10-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Reverse Lunges",
-          sets: 3,
-          reps: "8-12 each leg",
-          rest: "60 sec",
-        },
-        {
-          name: "Glute Bridges",
-          sets: 3,
-          reps: "12-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Standing Calf Raises",
-          sets: 3,
-          reps: "15-20",
-          rest: "45 sec",
-        },
-      ];
-    } else {
-      exercises = [
-        {
-          name: "Leg Press",
-          sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
-          reps: isMuscleGain ? "8-12" : "10-15",
-          rest: isAdvanced ? "120 sec" : "90 sec",
-        },
-        {
-          name: "Romanian Deadlift",
-          sets: isBeginner ? 2 : 3,
-          reps: "8-12",
-          rest: "90 sec",
-        },
-        {
-          name: "Leg Curl",
-          sets: 3,
-          reps: "10-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Standing Calf Raise",
-          sets: 3,
-          reps: "12-15",
-          rest: "60 sec",
-        },
-      ];
-    }
-  }
-
-  // =========================================================
-  // UPPER BODY
-  // =========================================================
-
-  else if (workoutType === "Upper Body") {
+  if (location === "home") {
     exercises = [
       {
-        name: location === "home"
-          ? "Push-Ups"
-          : "Incline Bench Press",
+        name: "Push-Ups",
+        sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
+        reps: isMuscleGain ? "8-12" : "10-15",
+        rest: isAdvanced ? "75 sec" : "60 sec",
+      },
+      {
+        name: "Incline Push-Ups",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Dumbbell Floor Press",
+        sets: 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Dumbbell Fly",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Pike Push-Ups",
+        sets: isAdvanced ? 3 : 2,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Chair Tricep Dips",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Overhead Dumbbell Tricep Extension",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+    ];
+  } else {
+    exercises = [
+      {
+        name: "Bench Press",
+        sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
+        reps: isMuscleGain ? "6-10" : "8-12",
+        rest: isAdvanced ? "120 sec" : "90 sec",
+      },
+      {
+        name: "Incline Dumbbell Press",
         sets: isAdvanced ? 4 : 3,
         reps: "8-12",
         rest: "75 sec",
       },
       {
-        name: location === "home"
-          ? "Resistance Band Row"
-          : "Chest Supported Row",
-        sets: isAdvanced ? 4 : 3,
+        name: "Machine Chest Press",
+        sets: 3,
         reps: "8-12",
         rest: "75 sec",
+      },
+      {
+        name: "Cable Fly",
+        sets: 3,
+        reps: "12-15",
+        rest: "60 sec",
       },
       {
         name: "Lateral Raises",
@@ -1182,34 +1051,150 @@ function generateExercisesForWorkout(
         rest: "60 sec",
       },
       {
-        name: location === "home"
-          ? "Dumbbell Curl"
-          : "Cable Curl",
+        name: "Tricep Pushdowns",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Overhead Tricep Extension",
         sets: 3,
         reps: "10-15",
         rest: "60 sec",
       },
     ];
   }
+}
 
   // =========================================================
-  // LOWER BODY
+  // PULL
   // =========================================================
 
-  else if (workoutType === "Lower Body") {
-    if (location === "home") {
+  else if (workoutType === "Pull") {
+  if (location === "home") {
+    exercises = [
+      {
+        name: "Resistance Band Rows",
+        sets: isAdvanced ? 4 : 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Resistance Band Pulldowns",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "One-Arm Dumbbell Row",
+        sets: isAdvanced ? 4 : 3,
+        reps: "8-12 each side",
+        rest: "75 sec",
+      },
+      {
+        name: "Dumbbell Pullover",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Dumbbell Reverse Fly",
+        sets: 3,
+        reps: "12-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Dumbbell Curls",
+        sets: 3,
+        reps: "10-12",
+        rest: "60 sec",
+      },
+      {
+        name: "Hammer Curls",
+        sets: 3,
+        reps: "10-12",
+        rest: "60 sec",
+      },
+    ];
+  } else {
+    exercises = [
+      {
+        name: "Lat Pulldown",
+        sets: isBeginner ? 3 : 4,
+        reps: "8-12",
+        rest: isAdvanced ? "120 sec" : "90 sec",
+      },
+      {
+        name: "Seated Cable Row",
+        sets: isAdvanced ? 4 : 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Chest Supported Row",
+        sets: isBeginner ? 3 : 4,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Straight Arm Pulldown",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Face Pull",
+        sets: 3,
+        reps: "12-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Dumbbell Curl",
+        sets: 3,
+        reps: "10-12",
+        rest: "60 sec",
+      },
+      {
+        name: "Hammer Curl",
+        sets: 3,
+        reps: "10-12",
+        rest: "60 sec",
+      },
+    ];
+  }
+}
+
+  // =========================================================
+  // LEGS
+  // =========================================================
+
+  else if (workoutType === "Legs") {
+  if (location === "home") {
+    if (legFocus === "hamstring") {
       exercises = [
         {
-          name: "Bodyweight Squats",
-          sets: isAdvanced ? 4 : 3,
+          name: "Dumbbell Romanian Deadlift",
+          sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
+          reps: "8-12",
+          rest: isAdvanced ? "120 sec" : "90 sec",
+        },
+        {
+          name: "Hamstring Walkouts",
+          sets: 3,
+          reps: "8-12",
+          rest: "60 sec",
+        },
+        {
+          name: "Sliding Leg Curl",
+          sets: 3,
           reps: "10-15",
           rest: "60 sec",
         },
         {
-          name: "Reverse Lunges",
+          name: "Goblet Squat",
           sets: 3,
-          reps: "8-12 each leg",
-          rest: "60 sec",
+          reps: "8-12",
+          rest: "75 sec",
         },
         {
           name: "Glute Bridges",
@@ -1227,60 +1212,78 @@ function generateExercisesForWorkout(
     } else {
       exercises = [
         {
-          name: "Leg Press",
-          sets: isAdvanced ? 4 : 3,
+          name: "Goblet Squat",
+          sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
           reps: "8-12",
-          rest: "90 sec",
+          rest: isAdvanced ? "120 sec" : "90 sec",
         },
         {
           name: "Bulgarian Split Squat",
-          sets: isBeginner ? 2 : 3,
+          sets: 3,
+          reps: "8-12 each leg",
+          rest: "75 sec",
+        },
+        {
+          name: "Dumbbell Lunges",
+          sets: 3,
+          reps: "10-12 each leg",
+          rest: "60 sec",
+        },
+        {
+          name: "Dumbbell Romanian Deadlift",
+          sets: 3,
           reps: "8-12",
           rest: "90 sec",
         },
         {
-          name: "Leg Curl",
-          sets: 3,
-          reps: "10-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Seated Calf Raise",
+          name: "Glute Bridges",
           sets: 3,
           reps: "12-15",
           rest: "60 sec",
         },
+        {
+          name: "Standing Calf Raises",
+          sets: 3,
+          reps: "15-20",
+          rest: "45 sec",
+        },
       ];
     }
-  }
-
-  // =========================================================
-  // FULL BODY
-  // =========================================================
-
-  else if (workoutType === "Full Body") {
-    if (location === "home") {
+  } else {
+    if (legFocus === "hamstring") {
       exercises = [
         {
-          name: "Bodyweight Squats",
+          name: "Romanian Deadlift",
+          sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
+          reps: "8-12",
+          rest: isAdvanced ? "120 sec" : "90 sec",
+        },
+        {
+          name: "Seated Leg Curl",
           sets: 3,
           reps: "10-15",
           rest: "60 sec",
         },
         {
-          name: "Push-Ups",
-          sets: 3,
-          reps: "8-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Resistance Band Rows",
+          name: "Lying Leg Curl",
           sets: 3,
           reps: "10-15",
           rest: "60 sec",
         },
         {
-          name: "Glute Bridges",
+          name: "Leg Press",
+          sets: 3,
+          reps: "8-12",
+          rest: "90 sec",
+        },
+        {
+          name: "Hip Thrust",
+          sets: 3,
+          reps: "8-12",
+          rest: "75 sec",
+        },
+        {
+          name: "Standing Calf Raise",
           sets: 3,
           reps: "12-15",
           rest: "60 sec",
@@ -1295,10 +1298,293 @@ function generateExercisesForWorkout(
           rest: isAdvanced ? "120 sec" : "90 sec",
         },
         {
-          name: "Bench Press",
+          name: "Leg Press",
           sets: 3,
           reps: "8-12",
           rest: "90 sec",
+        },
+        {
+          name: "Leg Extension",
+          sets: 3,
+          reps: "10-15",
+          rest: "60 sec",
+        },
+        {
+          name: "Romanian Deadlift",
+          sets: 3,
+          reps: "8-12",
+          rest: "90 sec",
+        },
+        {
+          name: "Hip Thrust",
+          sets: 3,
+          reps: "8-12",
+          rest: "75 sec",
+        },
+        {
+          name: "Standing Calf Raise",
+          sets: 3,
+          reps: "12-15",
+          rest: "60 sec",
+        },
+      ];
+    }
+  }
+}
+
+  // =========================================================
+  // UPPER BODY
+  // =========================================================
+
+  else if (workoutType === "Upper Body") {
+  if (location === "home") {
+    exercises = [
+      {
+        name: "Push-Ups",
+        sets: isAdvanced ? 4 : 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Dumbbell Floor Press",
+        sets: 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Resistance Band Row",
+        sets: isAdvanced ? 4 : 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "One-Arm Dumbbell Row",
+        sets: 3,
+        reps: "8-12 each side",
+        rest: "75 sec",
+      },
+      {
+        name: "Dumbbell Lateral Raises",
+        sets: 3,
+        reps: "12-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Dumbbell Curl",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Overhead Dumbbell Tricep Extension",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+    ];
+  } else {
+    exercises = [
+      {
+        name: "Incline Bench Press",
+        sets: isAdvanced ? 4 : 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Machine Chest Press",
+        sets: 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Lat Pulldown",
+        sets: isBeginner ? 3 : 4,
+        reps: "8-12",
+        rest: isAdvanced ? "120 sec" : "90 sec",
+      },
+      {
+        name: "Chest Supported Row",
+        sets: isAdvanced ? 4 : 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Lateral Raises",
+        sets: 3,
+        reps: "12-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Cable Curl",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Tricep Pushdown",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+    ];
+  }
+}
+
+  // =========================================================
+  // LOWER BODY
+  // =========================================================
+
+  else if (workoutType === "Lower Body") {
+  if (location === "home") {
+    exercises = [
+      {
+        name: "Goblet Squats",
+        sets: isAdvanced ? 4 : 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Reverse Lunges",
+        sets: 3,
+        reps: "8-12 each leg",
+        rest: "60 sec",
+      },
+      {
+        name: "Romanian Deadlift",
+        sets: isBeginner ? 2 : 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Dumbbell Leg Curl",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Glute Bridges",
+        sets: 3,
+        reps: "12-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Standing Calf Raises",
+        sets: 3,
+        reps: "15-20",
+        rest: "45 sec",
+      },
+    ];
+  } else {
+    exercises = [
+      {
+        name: "Leg Press",
+        sets: isAdvanced ? 4 : 3,
+        reps: "8-12",
+        rest: "90 sec",
+      },
+      {
+        name: "Bulgarian Split Squat",
+        sets: isBeginner ? 2 : 3,
+        reps: "8-12 each leg",
+        rest: "90 sec",
+      },
+      {
+        name: "Romanian Deadlift",
+        sets: isBeginner ? 2 : 3,
+        reps: "8-12",
+        rest: "90 sec",
+      },
+      {
+        name: "Seated Leg Curl",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+      {
+        name: "Hip Thrust",
+        sets: 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
+      {
+        name: "Seated Calf Raise",
+        sets: 3,
+        reps: "12-15",
+        rest: "60 sec",
+      },
+    ];
+  }
+}
+
+  // =========================================================
+  // FULL BODY
+  // =========================================================
+
+   else if (workoutType === "Full Body") {
+    if (location === "home") {
+      exercises = [
+        {
+          name: "Goblet Squat",
+          sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
+          reps: "8-12",
+          rest: isAdvanced ? "90 sec" : "75 sec",
+        },
+        {
+          name: "Dumbbell Romanian Deadlift",
+          sets: isBeginner ? 2 : 3,
+          reps: "8-12",
+          rest: "75 sec",
+        },
+        {
+          name: "Dumbbell Floor Press",
+          sets: 3,
+          reps: "8-12",
+          rest: "75 sec",
+        },
+        {
+          name: "One-Arm Dumbbell Row",
+          sets: isAdvanced ? 4 : 3,
+          reps: "8-12 each side",
+          rest: "75 sec",
+        },
+        {
+          name: "Dumbbell Lateral Raise",
+          sets: 3,
+          reps: "12-15",
+          rest: "60 sec",
+        },
+        {
+          name: "Dumbbell Curl",
+          sets: 2,
+          reps: "10-15",
+          rest: "60 sec",
+        },
+        {
+          name: "Overhead Dumbbell Tricep Extension",
+          sets: 2,
+          reps: "10-15",
+          rest: "60 sec",
+        },
+      ];
+    } else {
+      exercises = [
+        {
+          name: "Squat",
+          sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
+          reps: isMuscleGain ? "6-10" : "8-12",
+          rest: isAdvanced ? "120 sec" : "90 sec",
+        },
+        {
+          name: "Romanian Deadlift",
+          sets: isBeginner ? 2 : 3,
+          reps: "8-12",
+          rest: isAdvanced ? "120 sec" : "90 sec",
+        },
+        {
+          name: "Bench Press",
+          sets: 3,
+          reps: "6-10",
+          rest: isAdvanced ? "120 sec" : "90 sec",
         },
         {
           name: "Lat Pulldown",
@@ -1307,10 +1593,28 @@ function generateExercisesForWorkout(
           rest: "75 sec",
         },
         {
-          name: "Romanian Deadlift",
-          sets: isBeginner ? 2 : 3,
+          name: "Seated Cable Row",
+          sets: 3,
           reps: "8-12",
-          rest: "90 sec",
+          rest: "75 sec",
+        },
+        {
+          name: "Lateral Raises",
+          sets: 3,
+          reps: "12-15",
+          rest: "60 sec",
+        },
+        {
+          name: "Cable Curl",
+          sets: 2,
+          reps: "10-15",
+          rest: "60 sec",
+        },
+        {
+          name: "Tricep Pushdown",
+          sets: 2,
+          reps: "10-15",
+          rest: "60 sec",
         },
       ];
     }
@@ -1811,7 +2115,11 @@ function generateWorkoutPlan(profile: any) {
         day: "Wednesday",
         type: "Legs",
         focus: "Quads • Hamstrings • Glutes • Calves",
-        exercises: generateExercisesForWorkout("Legs", profile),
+        exercises: generateExercisesForWorkout(
+  "Legs",
+  profile,
+  "quad"
+),
       },
       {
         day: "Thursday",
@@ -1856,7 +2164,11 @@ function generateWorkoutPlan(profile: any) {
         day: "Wednesday",
         type: "Legs",
         focus: "Quads • Hamstrings • Glutes • Calves",
-        exercises: generateExercisesForWorkout("Legs", profile),
+        exercises: generateExercisesForWorkout(
+  "Legs",
+  profile,
+  "hamstring"
+),
       },
       {
         day: "Thursday",
