@@ -2254,21 +2254,33 @@ const FOOD_DATABASE = {
     .trim()
     .replace(/[\s-]+/g, "_");
 
-  const mealsPerDay = Math.max(
-    3,
-    Math.min(5, Number(profile?.meals_per_day || 3))
-  );
+  const dailyCalories = Number(calories) || 0;
+const dailyProtein = Number(proteinTarget) || 0;
 
-  const allergies = String(
-    profile?.food_allergies || ""
-  ).toLowerCase();
+const requestedMeals = Number(
+  profile?.meals_per_day || 3
+);
 
-  const restrictions = String(
-    profile?.food_restrictions || ""
-  ).toLowerCase();
+const mealsPerDay =
+  dailyProtein > 200
+    ? 5
+    : dailyProtein >= 160
+    ? Math.max(
+        4,
+        Math.min(5, requestedMeals)
+      )
+    : Math.max(
+        3,
+        Math.min(5, requestedMeals)
+      );
 
-  const dailyCalories = Number(calories) || 2000;
-  const dailyProtein = Number(proteinTarget) || 120;
+const allergies = String(
+  profile?.food_allergies || ""
+).toLowerCase();
+
+const restrictions = String(
+  profile?.food_restrictions || ""
+).toLowerCase();
 
   const isVegan = diet === "vegan";
   const isVegetarian =
@@ -2918,54 +2930,212 @@ const FOOD_DATABASE = {
         });
       }
 
-      const meals = selectedMeals.map((meal: any) => {
-        const foods = meal.foods.map((food: any[]) =>
-          calculateFood(
-            food[0],
-            food[1],
-            food[2]
-          )
-        );
+      let meals = selectedMeals.map((meal: any) => {
+  const foods = meal.foods.map((food: any[]) =>
+    calculateFood(
+      food[0],
+      food[1],
+      food[2]
+    )
+  );
 
-        const mealCalories = foods.reduce(
-          (sum: number, food: any) =>
-            sum + food.calories,
-          0
-        );
+  const mealCalories = foods.reduce(
+    (sum: number, food: any) =>
+      sum + food.calories,
+    0
+  );
 
-        const mealProtein = foods.reduce(
-          (sum: number, food: any) =>
-            sum + food.protein,
-          0
-        );
+  const mealProtein = foods.reduce(
+    (sum: number, food: any) =>
+      sum + food.protein,
+    0
+  );
 
-        const mealCarbs = foods.reduce(
-          (sum: number, food: any) =>
-            sum + food.carbs,
-          0
-        );
+  const mealCarbs = foods.reduce(
+    (sum: number, food: any) =>
+      sum + food.carbs,
+    0
+  );
 
-        const mealFat = foods.reduce(
-          (sum: number, food: any) =>
-            sum + food.fat,
-          0
-        );
+  const mealFat = foods.reduce(
+    (sum: number, food: any) =>
+      sum + food.fat,
+    0
+  );
 
-        return {
-          name: meal.name,
-          foods,
-          calories: Math.round(mealCalories),
-          protein: Number(
-            mealProtein.toFixed(1)
-          ),
-          carbs: Number(
-            mealCarbs.toFixed(1)
-          ),
-          fat: Number(
-            mealFat.toFixed(1)
-          ),
-        };
-      });
+  return {
+    name: meal.name,
+    foods,
+    calories: Math.round(mealCalories),
+    protein: Number(
+      mealProtein.toFixed(1)
+    ),
+    carbs: Number(
+      mealCarbs.toFixed(1)
+    ),
+    fat: Number(
+      mealFat.toFixed(1)
+    ),
+  };
+});
+
+/* ================================
+   SMART PROTEIN TARGET BALANCING
+================================ */
+
+const getDailyProtein = () =>
+  meals.reduce(
+    (total: number, meal: any) =>
+      total +
+      meal.foods.reduce(
+        (sum: number, food: any) =>
+          sum + food.protein,
+        0
+      ),
+    0
+  );
+
+const proteinPriority = [
+  "Chicken",
+  "Fish",
+  "Eggs",
+  "Greek Yogurt",
+  "Soy Chunks",
+  "Tofu",
+  "Paneer",
+  "Dal",
+  "Lentils",
+  "Chickpeas",
+  "Rajma",
+];
+
+const getProteinStep = (food: any) => {
+  if (food.name === "Eggs") return 1;
+  if (food.name === "Greek Yogurt") return 50;
+  if (food.name === "Chicken") return 25;
+  if (food.name === "Fish") return 25;
+  if (food.name === "Soy Chunks") return 25;
+  if (food.name === "Tofu") return 25;
+  if (food.name === "Paneer") return 25;
+  return 50;
+};
+
+const getProteinMax = (food: any) => {
+  if (food.name === "Eggs") return 6;
+  if (food.name === "Greek Yogurt") return 500;
+  if (food.name === "Chicken") return 400;
+  if (food.name === "Fish") return 400;
+  if (food.name === "Soy Chunks") return 150;
+  if (food.name === "Tofu") return 400;
+  if (food.name === "Paneer") return 300;
+  return 400;
+};
+
+for (let iteration = 0; iteration < 100; iteration++) {
+  const currentProtein = getDailyProtein();
+
+  if (currentProtein >= dailyProtein) {
+    break;
+  }
+
+  let bestMealIndex = -1;
+  let bestFoodIndex = -1;
+  let bestProteinGain = 0;
+  let bestFood: any = null;
+
+  meals.forEach(
+    (meal: any, mealIndex: number) => {
+      meal.foods.forEach(
+        (food: any, foodIndex: number) => {
+          if (
+            !proteinPriority.includes(food.name)
+          ) {
+            return;
+          }
+
+          const step = getProteinStep(food);
+
+          if (
+            food.quantity + step >
+            getProteinMax(food)
+          ) {
+            return;
+          }
+
+          const newFood = calculateFood(
+            food.name,
+            food.quantity + step,
+            food.unit
+          );
+
+          const proteinGain =
+            newFood.protein - food.protein;
+
+          if (proteinGain > bestProteinGain) {
+            bestProteinGain = proteinGain;
+            bestMealIndex = mealIndex;
+            bestFoodIndex = foodIndex;
+            bestFood = newFood;
+          }
+        }
+      );
+    }
+  );
+
+  if (
+    bestMealIndex === -1 ||
+    bestFoodIndex === -1 ||
+    !bestFood
+  ) {
+    break;
+  }
+
+  meals[bestMealIndex].foods[
+    bestFoodIndex
+  ] = bestFood;
+}
+
+/* Recalculate final meal totals */
+
+meals = meals.map((meal: any) => {
+  const mealCalories = meal.foods.reduce(
+    (sum: number, food: any) =>
+      sum + food.calories,
+    0
+  );
+
+  const mealProtein = meal.foods.reduce(
+    (sum: number, food: any) =>
+      sum + food.protein,
+    0
+  );
+
+  const mealCarbs = meal.foods.reduce(
+    (sum: number, food: any) =>
+      sum + food.carbs,
+    0
+  );
+
+  const mealFat = meal.foods.reduce(
+    (sum: number, food: any) =>
+      sum + food.fat,
+    0
+  );
+
+  return {
+    ...meal,
+    calories: Math.round(mealCalories),
+    protein: Number(
+      mealProtein.toFixed(1)
+    ),
+    carbs: Number(
+      mealCarbs.toFixed(1)
+    ),
+    fat: Number(
+      mealFat.toFixed(1)
+    ),
+  };
+});
 
       return {
         day: dayNames[dayIndex],

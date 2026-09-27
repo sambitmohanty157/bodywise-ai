@@ -702,16 +702,40 @@ medical_conditions: data.medical_conditions || "",
       "Soy",
     ].map((item) => {
 
-      const selected =
-        form.food_allergies === item;
+    const selected =
+     form.food_allergies
+    .split(",")
+    .map((value) => value.trim())
+    .includes(item);
 
       return (
         <button
           key={item}
           type="button"
-          onClick={() =>
-            handleChange("food_allergies", item)
-          }
+          onClick={() => {
+  const current = form.food_allergies
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (item === "None") {
+    handleChange("food_allergies", "None");
+    return;
+  }
+
+  const withoutNone = current.filter(
+    (value) => value !== "None"
+  );
+
+  const updated = withoutNone.includes(item)
+    ? withoutNone.filter((value) => value !== item)
+    : [...withoutNone, item];
+
+  handleChange(
+    "food_allergies",
+    updated.join(", ")
+  );
+}}
           className={`px-4 py-2 rounded-full border transition-all duration-200
           ${
             selected
@@ -745,16 +769,40 @@ medical_conditions: data.medical_conditions || "",
       "No Seafood",
     ].map((item) => {
 
-      const selected =
-        form.food_restrictions === item;
+    const selected =
+    form.food_restrictions
+    .split(",")
+    .map((value) => value.trim())
+    .includes(item);
 
       return (
         <button
           key={item}
           type="button"
-          onClick={() =>
-            handleChange("food_restrictions", item)
-          }
+          onClick={() => {
+  const current = form.food_restrictions
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (item === "None") {
+    handleChange("food_restrictions", "None");
+    return;
+  }
+
+  const withoutNone = current.filter(
+    (value) => value !== "None"
+  );
+
+  const updated = withoutNone.includes(item)
+    ? withoutNone.filter((value) => value !== item)
+    : [...withoutNone, item];
+
+  handleChange(
+    "food_restrictions",
+    updated.join(", ")
+  );
+}}
           className={`px-4 py-2 rounded-full border transition-all duration-200
           ${
             selected
