@@ -28,7 +28,6 @@ export default function UserDashboard({ user }: UserDashboardProps) {
   const [weightHistory, setWeightHistory] = useState<any[]>([]);
   const [foodName, setFoodName] = useState('');
   const [quantity, setQuantity] = useState('100');
-
   const [caloriesInput, setCaloriesInput] = useState('');
   const [proteinInput, setProteinInput] = useState('');
   const [carbsInput, setCarbsInput] = useState('');
@@ -36,12 +35,55 @@ export default function UserDashboard({ user }: UserDashboardProps) {
   const [foodLogs, setFoodLogs] = useState<any[]>([]);
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [aiPlan, setAiPlan] = useState<any>(null);
+  const [popup, setPopup] = useState<{
+    open: boolean;
+    type: "message" | "confirm";
+    title: string;
+    message: string;
+  }>({
+    open: false,
+    type: "message",
+    title: "",
+    message: "",
+  });
+  const [confirmResolver, setConfirmResolver] = useState<
+    ((value: boolean) => void) | null
+  >(null);
+
+  const showMessage = (message: string, title = "BodyWise AI") => {
+    setPopup({
+      open: true,
+      type: "message",
+      title,
+      message,
+    });
+  };
+
+  const showConfirm = (message: string, title = "Please Confirm") =>
+    new Promise<boolean>((resolve) => {
+      setConfirmResolver(() => resolve);
+      setPopup({
+        open: true,
+        type: "confirm",
+        title,
+        message,
+      });
+    });
+
+  const closePopup = (confirmed = false) => {
+    if (popup.type === "confirm" && confirmResolver) {
+      confirmResolver(confirmed);
+    }
+
+    setConfirmResolver(null);
+    setPopup((current) => ({ ...current, open: false }));
+  };
   const [exerciseWeights, setExerciseWeights] = useState<Record<string, string>>({});
   const [exerciseReps, setExerciseReps] = useState<Record<string, string>>({});
 
   const autoFillFood = async (food: string) => {
   if (!food.trim()) {
-    alert("Please enter a food name.");
+    showMessage("Please enter a food name.");
     return;
   }
 
@@ -51,7 +93,7 @@ export default function UserDashboard({ user }: UserDashboardProps) {
     console.log("USDA RESPONSE:", data);
 
     if (!data?.foods || data.foods.length === 0) {
-      alert(`No nutrition data found for "${food}".`);
+      showMessage(`No nutrition data found for "${food}".`);
       return;
     }
 
@@ -119,8 +161,9 @@ export default function UserDashboard({ user }: UserDashboardProps) {
   } catch (error) {
     console.error("AUTO FILL ERROR:", error);
 
-    alert(
-      "Unable to fetch nutrition data. Please check your USDA API key or internet connection."
+    showMessage(
+      "Please check your USDA API key or internet connection and try again.",
+      "Nutrition Data Error"
     );
   }
 };
@@ -473,81 +516,6 @@ const totalFat = foodLogs.reduce(
   0
 );
 
-    const workoutPlan =
-  profile?.fitness_goal === 'muscle_gain'
-    ? [
-        {
-          day: 'Monday - Push',
-          exercises: [
-            'Bench Press',
-            'Incline Dumbbell Press',
-            'Shoulder Press',
-            'Lateral Raises',
-            'Tricep Pushdowns'
-          ]
-        },
-        {
-          day: 'Tuesday - Pull',
-          exercises: [
-            'Pull Ups',
-            'Barbell Rows',
-            'Lat Pulldown',
-            'Face Pulls',
-            'Barbell Curls'
-          ]
-        },
-        {
-          day: 'Wednesday - Legs',
-          exercises: [
-            'Squats',
-            'Romanian Deadlift',
-            'Leg Press',
-            'Leg Curl',
-            'Standing Calf Raises'
-          ]
-        },
-        {
-          day: 'Thursday - Push',
-          exercises: [
-            'Incline Bench Press',
-            'Machine Chest Press',
-            'Arnold Press',
-            'Cable Lateral Raises',
-            'Overhead Tricep Extension'
-          ]
-        },
-        {
-          day: 'Friday - Pull',
-          exercises: [
-            'Deadlift',
-            'Seated Cable Row',
-            'Lat Pulldown',
-            'Hammer Curl',
-            'Preacher Curl'
-          ]
-        },
-        {
-          day: 'Saturday - Legs',
-          exercises: [
-            'Hack Squat',
-            'Bulgarian Split Squat',
-            'Leg Extension',
-            'Leg Curl',
-            'Seated Calf Raises'
-          ]
-        },
-        {
-          day: 'Sunday - Recovery',
-          exercises: [
-            'Walking',
-            'Stretching',
-            'Foam Rolling',
-            'Mobility Work'
-          ]
-        }
-      ]
-    : [];
-
     const mealPlan =
   profile?.fitness_goal === 'muscle_gain'
     ? {
@@ -590,7 +558,7 @@ async function logWorkout() {
 
 
   if (!isPro) {
-    alert("🔥 BodyWise Pro is required to log workouts.");
+    showMessage("🔥 BodyWise Pro is required to log workouts.");
     return;
   }
 
@@ -612,7 +580,7 @@ async function logWorkout() {
   console.log("Existing Workout Error:", existingWorkoutError);
 
   if (existingWorkoutError) {
-    alert(existingWorkoutError.message);
+    showMessage(existingWorkoutError.message);
     return;
   }
 
@@ -622,7 +590,7 @@ async function logWorkout() {
     existingWorkout.workout_exercises &&
     existingWorkout.workout_exercises.length > 0
   ) {
-    alert("Today's workout has already been logged.");
+    showMessage("Today's workout has already been logged.");
     return;
   }
 
@@ -647,7 +615,7 @@ async function logWorkout() {
     console.log("Workout Error:", workoutError);
 
     if (workoutError) {
-      alert(workoutError.message);
+      showMessage(workoutError.message);
       return;
     }
 
@@ -677,12 +645,12 @@ async function logWorkout() {
     console.log("Exercise Error:", exerciseError);
 
     if (exerciseError) {
-      alert(exerciseError.message);
+      showMessage(exerciseError.message);
       return;
     }
   }
 
-  alert("🎉 Workout Logged Successfully!");
+  showMessage("Your workout has been successfully logged.", "Workout Logged Successfully!");
 
 }
 
@@ -718,9 +686,9 @@ async function saveWeight() {
     ]);
 
   if (error) {
-    alert(error.message);
+    showMessage(error.message);
   } else {
-    alert('Weight Saved!');
+    showMessage('Your weight has been successfully saved.', 'Weight Saved!');
     setWeightInput('');
   }
 }
@@ -730,7 +698,7 @@ async function uploadTransformationPhoto() {
   if (!photoFile || !user) return;
 
   if (!isPro) {
-    alert("🔥 BodyWise Pro is required to upload transformation photos.");
+    showMessage("🔥 BodyWise Pro is required to upload transformation photos.");
     return;
   }
 
@@ -741,7 +709,7 @@ async function uploadTransformationPhoto() {
     .upload(fileName, photoFile);
 
   if (uploadError) {
-    alert(uploadError.message);
+    showMessage(uploadError.message);
     return;
   }
 
@@ -761,9 +729,9 @@ async function uploadTransformationPhoto() {
     ]);
 
   if (error) {
-    alert(error.message);
+    showMessage(error.message);
   } else {
-    alert('Transformation Photo Uploaded!');
+    showMessage('Your transformation photo has been successfully uploaded.', 'Photo Uploaded!');
   }
 }
 
@@ -774,12 +742,13 @@ const deleteTransformationPhoto = async (
   if (!user) return;
 
   if (!isPro) {
-    alert("🔥 BodyWise Pro is required to delete transformation photos.");
+    showMessage("🔥 BodyWise Pro is required to delete transformation photos.");
     return;
   }
 
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this transformation photo?"
+  const confirmed = await showConfirm(
+    "Are you sure you want to delete this transformation photo?",
+    "Delete Transformation Photo"
   );
 
   if (!confirmed) return;
@@ -792,7 +761,7 @@ const deleteTransformationPhoto = async (
       .remove([fileName]);
 
     if (storageError) {
-      alert(storageError.message);
+      showMessage(storageError.message);
       return;
     }
   }
@@ -804,7 +773,7 @@ const deleteTransformationPhoto = async (
     .eq("user_id", user.id);
 
   if (deleteError) {
-    alert(deleteError.message);
+    showMessage(deleteError.message);
     return;
   }
 
@@ -816,7 +785,7 @@ const deleteTransformationPhoto = async (
     currentIds.filter((id) => id !== photoId)
   );
 
-  alert("Transformation Photo Deleted!");
+  showMessage("Your transformation photo has been successfully deleted.", "Photo Deleted!");
 };
 
 const clearFoodForm = () => {
@@ -842,8 +811,9 @@ const deleteFoodLog = async (id: number) => {
 const deleteWorkout = async (workoutId: string) => {
   if (!user) return;
 
-  const confirmed = window.confirm(
-    "⚠️ Are you sure you want to delete this workout?"
+  const confirmed = await showConfirm(
+    "⚠️ Are you sure you want to delete this workout?",
+    "Delete Workout"
   );
 
   if (!confirmed) return;
@@ -855,7 +825,7 @@ const deleteWorkout = async (workoutId: string) => {
     .eq("user_id", user.id);
 
   if (exerciseError) {
-    alert(exerciseError.message);
+    showMessage(exerciseError.message);
     return;
   }
 
@@ -866,7 +836,7 @@ const deleteWorkout = async (workoutId: string) => {
     .eq("user_id", user.id);
 
   if (workoutError) {
-    alert(workoutError.message);
+    showMessage(workoutError.message);
     return;
   }
 
@@ -874,25 +844,25 @@ const deleteWorkout = async (workoutId: string) => {
     prev.filter((workout) => workout.id !== workoutId)
   );
 
-  alert("✅ Workout deleted successfully!");
+  showMessage("Your workout has been successfully deleted.", "Workout Deleted!");
 };
 
 const saveFoodLog = async () => {
 
   if (!user) {
 
-    alert('Please login first');
+    showMessage('Please login first');
 
     return;
   }
 
   if (!isPro) {
-    alert("🔥 BodyWise Pro is required to log food.");
+    showMessage("🔥 BodyWise Pro is required to log food.");
     return;
 }
   
   if (!foodName || !caloriesInput) {
-    alert('Please enter food details');
+    showMessage('Please enter food details');
     return;
   }
   
@@ -910,9 +880,9 @@ const saveFoodLog = async () => {
     },
   ]);
   if (error) {
-    alert(error.message);
+    showMessage(error.message);
   } else {
-    alert('Food Saved!');
+    showMessage('Your food entry has been successfully saved.', 'Food Saved!');
 
     
 setFoodLogs(prev => [
@@ -967,14 +937,14 @@ function generateExercisesForWorkout(
   const isFatLoss = fitnessGoal === "fat_loss";
 
   let exercises: any[] = [];
+// =========================================================
+// PUSH
+// =========================================================
 
-  // =========================================================
-  // PUSH
-  // =========================================================
-
-  if (workoutType === "Push") {
+if (workoutType === "Push") {
   if (location === "home") {
     exercises = [
+      // CHEST — 4
       {
         name: "Push-Ups",
         sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
@@ -999,12 +969,22 @@ function generateExercisesForWorkout(
         reps: "10-15",
         rest: "60 sec",
       },
+
+      // SHOULDERS — 2
       {
         name: "Pike Push-Ups",
         sets: isAdvanced ? 3 : 2,
         reps: "8-12",
         rest: "75 sec",
       },
+      {
+        name: "Dumbbell Lateral Raises",
+        sets: 3,
+        reps: "12-15",
+        rest: "60 sec",
+      },
+
+      // TRICEPS — 2
       {
         name: "Chair Tricep Dips",
         sets: 3,
@@ -1020,6 +1000,7 @@ function generateExercisesForWorkout(
     ];
   } else {
     exercises = [
+      // CHEST — 4
       {
         name: "Bench Press",
         sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
@@ -1044,12 +1025,22 @@ function generateExercisesForWorkout(
         reps: "12-15",
         rest: "60 sec",
       },
+
+      // SHOULDERS — 2
+      {
+        name: "Machine Shoulder Press",
+        sets: 3,
+        reps: "8-12",
+        rest: "75 sec",
+      },
       {
         name: "Lateral Raises",
         sets: 3,
         reps: "12-15",
         rest: "60 sec",
       },
+
+      // TRICEPS — 2
       {
         name: "Tricep Pushdowns",
         sets: 3,
@@ -1066,13 +1057,15 @@ function generateExercisesForWorkout(
   }
 }
 
-  // =========================================================
-  // PULL
-  // =========================================================
 
-  else if (workoutType === "Pull") {
+// =========================================================
+// PULL
+// =========================================================
+
+else if (workoutType === "Pull") {
   if (location === "home") {
     exercises = [
+      // BACK — 4
       {
         name: "Resistance Band Rows",
         sets: isAdvanced ? 4 : 3,
@@ -1097,12 +1090,22 @@ function generateExercisesForWorkout(
         reps: "10-15",
         rest: "60 sec",
       },
+
+      // REAR DELTS + TRAPS — 2
       {
         name: "Dumbbell Reverse Fly",
         sets: 3,
         reps: "12-15",
         rest: "60 sec",
       },
+      {
+        name: "Dumbbell Shrugs",
+        sets: 3,
+        reps: "10-15",
+        rest: "60 sec",
+      },
+
+      // BICEPS — 2
       {
         name: "Dumbbell Curls",
         sets: 3,
@@ -1118,6 +1121,7 @@ function generateExercisesForWorkout(
     ];
   } else {
     exercises = [
+      // BACK — 4
       {
         name: "Lat Pulldown",
         sets: isBeginner ? 3 : 4,
@@ -1142,12 +1146,22 @@ function generateExercisesForWorkout(
         reps: "10-15",
         rest: "60 sec",
       },
+
+      // REAR DELTS + TRAPS — 2
       {
         name: "Face Pull",
         sets: 3,
         reps: "12-15",
         rest: "60 sec",
       },
+      {
+        name: "Dumbbell Shrugs",
+        sets: 3,
+        reps: "10-15",
+        rest: "75 sec",
+      },
+
+      // BICEPS — 2
       {
         name: "Dumbbell Curl",
         sets: 3,
@@ -1689,17 +1703,17 @@ function adjustExercisesForInjury(exercises: any[], injury: string) {
       },
 
       "Lateral Raises": {
-        name: "Cable Chest Fly",
+        name: "Cable Lateral Raises",
         sets: 3,
         reps: "10-15",
         rest: "60 sec",
       },
 
       "Shoulder Press": {
-        name: "Cable Chest Fly",
+         name: "Machine Shoulder Press",
         sets: 3,
-        reps: "10-15",
-        rest: "60 sec",
+        reps: "8-12",
+        rest: "75 sec",
       },
 
       "Pike Push-Ups": {
@@ -2249,7 +2263,7 @@ async function handleGenerateAIPlan() {
   if (!user) return;
 
   if (!isPro) {
-    alert("🔥 BodyWise Pro is required to create or update your AI plan.");
+    showMessage("🔥 BodyWise Pro is required to create or update your AI plan.");
     return;
   }
 
@@ -2286,9 +2300,45 @@ async function handleGenerateAIPlan() {
 
 console.log("AI USER CONTEXT:", userContext);
 
-const personalizedWeeklyPlan = generateWorkoutPlan(profile);
+const generatedWeeklyPlan = generateWorkoutPlan(profile);
+
+// Safety check: prevent duplicate exercise names within the same workout day
+const personalizedWeeklyPlan = generatedWeeklyPlan.map((day: any) => {
+  const uniqueExercises = Array.from(
+    new Map(
+      (day.exercises || []).map((exercise: any) => [
+        exercise.name,
+        exercise,
+      ])
+    ).values()
+  );
+
+  return {
+    ...day,
+    exercises: uniqueExercises,
+  };
+});
 
 console.log("PERSONALIZED WEEKLY PLAN:", personalizedWeeklyPlan);
+
+// Debug duplicate check
+personalizedWeeklyPlan.forEach((day: any) => {
+  const names = (day.exercises || []).map(
+    (exercise: any) => exercise.name
+  );
+
+  const duplicates = names.filter(
+    (name: string, index: number) =>
+      names.indexOf(name) !== index
+  );
+
+  if (duplicates.length > 0) {
+    console.warn(
+      `Duplicate exercises found on ${day.day}:`,
+      duplicates
+    );
+  }
+});
 
 const FOOD_DATABASE = {
   "Oats": {
@@ -3513,13 +3563,15 @@ nutrition: {
 
   if (error) {
     console.error(error);
-    alert("Failed to save AI Plan");
+    showMessage("Failed to save AI Plan");
     return;
   }
 
   setAiPlan(data);
-
-  alert("🎉 AI Plan saved successfully!");
+  showMessage(
+    "Your personalized workout and nutrition plan has been successfully updated.",
+    "AI Plan Updated!"
+  );
 }
 
 async function loadAIPlan() {
@@ -4385,8 +4437,59 @@ const progressPercentage =
   </div>
 </div>
 
+
+
+      {/* BODYWISE CUSTOM POPUP */}
+      {popup.open && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+          <div className="relative w-full max-w-md rounded-3xl border border-red-500/30 bg-gradient-to-br from-surface-gray-900 to-black p-8 text-center shadow-2xl shadow-red-500/10">
+
+            <div className="absolute inset-0 rounded-3xl bg-red-500/5 pointer-events-none" />
+
+            <div className="relative">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/15 border border-red-500/30">
+                <span className="text-3xl">{popup.type === "confirm" ? "⚠️" : "🎉"}</span>
+              </div>
+
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {popup.title}
+              </h2>
+
+              <p className="text-surface-gray-400 mb-7 leading-relaxed">
+                {popup.message}
+              </p>
+
+              {popup.type === "confirm" ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => closePopup(false)}
+                    className="w-full rounded-xl border border-white/10 bg-surface-gray-800 px-6 py-3 font-semibold text-white transition-all duration-200 hover:bg-surface-gray-700 active:scale-[0.98]"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={() => closePopup(true)}
+                    className="w-full rounded-xl bg-red-500 px-6 py-3 font-semibold text-white transition-all duration-200 hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/20 active:scale-[0.98]"
+                  >
+                    OK
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => closePopup()}
+                  className="w-full rounded-xl bg-red-500 px-6 py-3 font-semibold text-white transition-all duration-200 hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/20 active:scale-[0.98]"
+                >
+                  Continue
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
         </div>
       </div>
    </div>
-  );
- }
+);
+}
