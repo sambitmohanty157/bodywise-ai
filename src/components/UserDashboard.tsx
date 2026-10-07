@@ -16,6 +16,323 @@ interface UserDashboardProps {
   user: User | null;
 }
 
+// =========================================================
+// EXERCISE VISUALS
+// Lightweight built-in SVG thumbnails so every workout
+// exercise has a visual without requiring another API/key.
+// =========================================================
+
+type ExerciseVisualType =
+  | "bench"
+  | "inclinePress"
+  | "chestFly"
+  | "pushup"
+  | "pulldown"
+  | "row"
+  | "facePull"
+  | "deadlift"
+  | "squat"
+  | "legPress"
+  | "legExtension"
+  | "legCurl"
+  | "lunge"
+  | "calf"
+  | "lateralRaise"
+  | "shoulderPress"
+  | "dumbbellCurl"
+  | "hammerCurl"
+  | "cableCurl"
+  | "barbellCurl"
+  | "curl"
+  | "tricepPushdown"
+  | "tricepExtension"
+  | "dip"
+  | "core"
+  | "cardio"
+  | "general";
+
+function getExerciseVisualType(name: string): ExerciseVisualType {
+  const n = String(name || "").toLowerCase();
+
+  if (n.includes("incline dumbbell press") || n.includes("incline bench press") || n.includes("incline press")) return "inclinePress";
+  if (n.includes("bench press") || n.includes("floor press") || n.includes("chest press") || n.includes("resistance band chest press")) return "bench";
+  if (n.includes("fly") || n.includes("chest fly")) return "chestFly";
+  if (n.includes("push-up") || n.includes("push up")) return "pushup";
+
+  if (n.includes("lat pulldown") || n.includes("pulldown") || n.includes("pull down")) return "pulldown";
+  if (n.includes("face pull") || n.includes("reverse fly")) return "facePull";
+  if (n.includes("row") || n.includes("pullover")) return "row";
+
+  if (n.includes("deadlift") || n.includes("hip thrust") || n.includes("glute bridge") || n.includes("hamstring walkout")) return "deadlift";
+  if (n.includes("leg press")) return "legPress";
+  if (n.includes("leg extension")) return "legExtension";
+  if (n.includes("leg curl") || n.includes("seated leg curl") || n.includes("lying leg curl")) return "legCurl";
+  if (n.includes("squat") || n.includes("goblet squat")) return "squat";
+  if (n.includes("lunge") || n.includes("bulgarian") || n.includes("split squat")) return "lunge";
+  if (n.includes("calf")) return "calf";
+
+  if (n.includes("lateral raise") || n.includes("lateral raises")) return "lateralRaise";
+  if (n.includes("shoulder press") || n.includes("pike push")) return "shoulderPress";
+  if (n.includes("dumbbell curl") || n.includes("dumbbell curls")) return "dumbbellCurl";
+if (n.includes("hammer curl") || n.includes("hammer curls")) return "hammerCurl";
+if (n.includes("cable curl") || n.includes("cable curls")) return "cableCurl";
+if (n.includes("barbell curl") || n.includes("barbell curls")) return "barbellCurl";
+if (n.includes("curl")) return "curl";
+  if (n.includes("tricep pushdown") || n.includes("triceps pushdown") || n.includes("tricep extension") || n.includes("triceps extension") || n.includes("cable tricep")) return "tricepPushdown";
+  if (n.includes("overhead") && n.includes("tricep")) return "tricepExtension";
+  if (n.includes("dip")) return "dip";
+
+  if (n.includes("plank") || n.includes("crunch") || n.includes("leg raise") || n.includes("ab")) return "core";
+  if (n.includes("walk") || n.includes("run") || n.includes("cycling") || n.includes("bike") || n.includes("cardio") || n.includes("hiit")) return "cardio";
+
+  return "general";
+}
+
+const getFoodImage = (foodName?: string) => {
+  const name = String(foodName || "").toLowerCase().trim();
+
+  if (!name) return "/foods/vegetables.jpg";
+
+  if (name.includes("oat")) return "/foods/oats.jpg";
+  if (name.includes("egg")) return "/foods/eggs.jpg";
+  if (name.includes("banana")) return "/foods/banana.jpg";
+  if (name.includes("milk")) return "/foods/milk.jpg";
+  if (name.includes("greek yogurt") || name.includes("greek-yogurt"))
+    return "/foods/greek-yogurt.jpg";
+  if (name.includes("yogurt") || name.includes("curd"))
+    return "/foods/greek-yogurt.jpg";
+  if (name.includes("rice")) return "/foods/rice.jpg";
+  if (name.includes("chicken")) return "/foods/chicken.jpg";
+  if (name.includes("fish") || name.includes("salmon"))
+    return "/foods/fish.jpg";
+  if (name.includes("paneer")) return "/foods/paneer.jpg";
+  if (name.includes("tofu")) return "/foods/tofu.jpg";
+  if (name.includes("dal")) return "/foods/dal.jpg";
+  if (name.includes("chickpea") || name.includes("chana"))
+    return "/foods/chickpeas.jpg";
+  if (name.includes("rajma") || name.includes("kidney bean"))
+    return "/foods/rajma.jpg";
+  if (name.includes("vegetable") || name.includes("sabzi"))
+    return "/foods/vegetables.jpg";
+  if (name.includes("salad")) return "/foods/salad.jpg";
+  if (name.includes("apple")) return "/foods/apple.jpg";
+  if (name.includes("almond")) return "/foods/almonds.jpg";
+  if (name.includes("sweet potato"))
+    return "/foods/sweet-potato.jpg";
+  if (name.includes("soy milk")) return "/foods/soy-milk.jpg";
+  if (name.includes("soy yogurt") || name.includes("soy yoghurt"))
+    return "/foods/soy-yogurt.jpg";
+  if (name.includes("soy chunk") || name.includes("soya chunk"))
+    return "/foods/soy-chunks.jpg";
+  if (name.includes("berry") || name.includes("berries"))
+    return "/foods/berries.jpg";
+  if (name.includes("nut")) return "/foods/nuts.jpg";
+  if (name.includes("peanut butter"))
+    return "/foods/peanut-butter.jpg";
+  if (name.includes("lentil")) return "/foods/lentils.jpg";
+  if (name.includes("fruit")) return "/foods/fruit.jpg";
+  if (name.includes("potato")) return "/foods/potato.jpg";
+  if (name.includes("spinach")) return "/foods/spinach.jpg";
+
+  return "/foods/vegetables.jpg";
+};
+
+function getExerciseImageSlug(name: string): string | null {
+  const n = String(name || "").toLowerCase();
+
+  if (n.includes("incline") && (n.includes("press") || n.includes("bench"))) return "incline-press";
+  if (n.includes("bench press") || n.includes("floor press") || n.includes("chest press") || n.includes("band chest press")) return "bench-press";
+  if (n.includes("fly")) return "chest-fly";
+
+  if (n.includes("lat pulldown") || n.includes("pulldown") || n.includes("pull down")) return "lat-pulldown";
+  if (n.includes("pull-up") || n.includes("pull up")) return "pull-ups";
+  if (n.includes("face pull")) return "face-pull";
+  if (n.includes("reverse fly") || n.includes("rear delt")) return "rear-delt-fly";
+  if (n.includes("t-bar row")) return "t-bar-row";
+  if (n.includes("seated cable row")) return "seated-cable-row";
+  if (n.includes("row") || n.includes("pullover")) return "barbell-row";
+
+  if (n.includes("leg press")) return "leg-press";
+  if (n.includes("leg extension")) return "leg-extension";
+  if (n.includes("lying leg curl")) return "lying-leg-curl";
+  if (n.includes("leg curl") || n.includes("sliding leg curl") || n.includes("hamstring walkout")) return "leg-curl";
+  if (n.includes("seated calf")) return "seated-calf-raise";
+  if (n.includes("calf")) return "calf-raise";
+  if (n.includes("bulgarian") || n.includes("split squat")) return "bulgarian-split-squat";
+  if (n.includes("lunge")) return "walking-lunge";
+  if (n.includes("romanian deadlift") || n.includes("deadlift")) return "romanian-deadlift";
+  if (n.includes("hip thrust") || n.includes("glute bridge")) return "hip-thrust";
+  if (n.includes("good morning")) return "good-morning";
+  if (n.includes("squat") || n.includes("goblet")) return "squat";
+
+  if (n.includes("lateral raise")) return "lateral-raise";
+  if (n.includes("front raise")) return "front-raise";
+  if (n.includes("upright row")) return "upright-row";
+  if (n.includes("shrug")) return "shrugs";
+  if (n.includes("shoulder press") || n.includes("pike push")) return "shoulder-press";
+
+  if (n.includes("preacher curl")) return "preacher-curl";
+  if (n.includes("hammer curl")) return "hammer-curl";
+  if (n.includes("curl")) return "barbell-curl";
+  if (n.includes("tricep pushdown") || n.includes("triceps pushdown")) return "tricep-pushdown";
+  if (n.includes("overhead") && n.includes("tricep")) return "overhead-tricep-extension";
+  if (n.includes("tricep extension") || n.includes("cable tricep")) return "tricep-pushdown";
+  if (n.includes("dip")) return "dips";
+
+  return null;
+}
+
+function ExerciseThumbnail({ name }: { name: string }) {
+  const imageSlug = getExerciseImageSlug(name);
+  const type = getExerciseVisualType(name);
+
+  if (type === "dumbbellCurl") {
+  return (
+    <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl border border-red-500/20 bg-black overflow-hidden shadow-inner shadow-red-500/10">
+      <img
+        src="/exercises/dumbbell-curl.jpg"
+        alt="Dumbbell Curl"
+        className="w-full h-full object-cover"
+      />
+    </div>
+  );
+}
+
+  if (imageSlug) {
+    return (
+      <div className="w-28 h-20 sm:w-32 sm:h-24 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#111] shadow-inner">
+        <img
+          src={`/exercises/${imageSlug}.jpg`}
+          alt={`${name} exercise demonstration`}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          onError={(event) => {
+            event.currentTarget.style.display = "none";
+          }}
+        />
+      </div>
+    );
+  }
+
+  const line = { stroke: "#ff6b6b", strokeWidth: 4.2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, fill: "none" };
+  const metal = { stroke: "#b7b7b7", strokeWidth: 2.5, strokeLinecap: "round" as const, fill: "none" };
+
+  const common = (
+    <>
+      <circle cx="52" cy="18" r="7" fill="#ff8b8b" stroke="#ff6b6b" strokeWidth="2" />
+      <path d="M47 27 Q52 24 57 27" {...line} />
+    </>
+  );
+
+  let pose: any;
+  switch (type) {
+    case "bench":
+      pose = <>
+        <path d="M28 68 L84 68" {...metal} /><path d="M38 68 L32 82 M73 68 L79 82" {...metal} />
+        <path d="M35 49 L70 49" {...metal} /><path d="M38 49 L44 38 L61 38 L69 49" {...line} />
+        <path d="M44 38 L34 31 M61 38 L72 31" {...line} /><path d="M28 28 L78 28" {...metal} /><path d="M33 25 L33 34 M73 25 L73 34" {...metal} />
+        {common}
+      </>;
+      break;
+    case "inclinePress":
+      pose = <>
+        <path d="M30 76 L82 76 M39 64 L34 82 M69 64 L77 82" {...metal} />
+        <path d="M37 57 L68 39" {...metal} /><path d="M43 52 L67 35" {...line} />
+        <path d="M48 48 L38 35 M62 40 L74 28" {...line} /><path d="M33 29 L82 29" {...metal} />
+        <path d="M38 26 L38 34 M77 26 L77 34" {...metal} />{common}
+      </>;
+      break;
+    case "chestFly":
+      pose = <>
+        <path d="M27 72 L83 72 M34 72 L31 82 M76 72 L79 82" {...metal} /><path d="M40 59 L70 59" {...metal} />
+        <path d="M52 54 L52 35" {...line} /><path d="M52 38 L33 28 M52 38 L71 28" {...line} />
+        <path d="M30 26 L36 29 M68 29 L74 26" {...metal} />{common}
+      </>;
+      break;
+    case "pushup":
+      pose = <><path d="M25 69 L77 55" {...line} /><path d="M37 65 L28 79 M57 59 L70 75" {...line} /><path d="M23 80 L35 80 M65 76 L78 76" {...metal} /><path d="M43 63 L35 48" {...line} />
+        <circle cx="83" cy="53" r="6" fill="#ff8b8b" stroke="#ff6b6b" strokeWidth="2" /></>;
+      break;
+    case "pulldown":
+      pose = <><path d="M25 11 L82 11" {...metal} /><path d="M30 11 L30 24 M77 11 L77 24" {...metal} /><path d="M52 28 L52 54" {...line} />
+        <path d="M52 30 L34 43 M52 30 L70 43" {...line} /><path d="M34 43 L39 23 M70 43 L65 23" {...line} /><path d="M39 23 L65 23" {...metal} />
+        <path d="M52 54 L39 77 M52 54 L65 77" {...line} />{common}</>;
+      break;
+    case "row":
+      pose = <><path d="M20 76 L88 76" {...metal} /><path d="M33 74 L43 54 L63 54 L76 74" {...metal} /><path d="M43 54 L51 31" {...line} />
+        <path d="M51 32 L67 43 M51 38 L36 48" {...line} /><path d="M67 43 L78 51" {...metal} /><path d="M34 48 L25 55" {...metal} />{common}</>;
+      break;
+    case "facePull":
+      pose = <><path d="M82 12 L82 82" {...metal} /><path d="M78 35 L58 35" {...metal} /><path d="M58 35 L45 28 M58 35 L45 42" {...line} /><path d="M45 28 L39 28 M45 42 L39 42" {...metal} />
+        <path d="M52 47 L52 68 M52 50 L35 43 M52 50 L69 43 M52 68 L42 79 M52 68 L62 79" {...line} />{common}</>;
+      break;
+    case "deadlift":
+      pose = <><path d="M18 73 L86 73" {...metal} /><path d="M35 72 L42 47 L58 47 L69 72" {...line} /><path d="M42 47 L52 31 L66 40" {...line} />
+        <path d="M66 40 L72 57" {...line} /><path d="M27 58 L77 58" {...metal} /><path d="M24 54 L24 62 M80 54 L80 62" {...metal} />{common}</>;
+      break;
+    case "squat":
+      pose = <><path d="M28 26 L80 26" {...metal} /><path d="M33 22 L33 31 M75 22 L75 31" {...metal} /><path d="M52 29 L52 49" {...line} /><path d="M52 35 L37 28 M52 35 L67 28" {...line} />
+        <path d="M52 49 L37 61 L29 76 M52 49 L67 61 L78 76" {...line} /><path d="M24 78 L37 78 M75 78 L88 78" {...metal} />{common}</>;
+      break;
+    case "legPress":
+      pose = <><path d="M23 76 L83 76 M32 76 L28 83 M73 76 L78 83" {...metal} /><path d="M34 58 L57 58 L68 38" {...metal} /><path d="M44 56 L59 40" {...line} /><path d="M59 40 L76 25" {...line} /><path d="M72 22 L82 29" {...metal} />{common}</>;
+      break;
+    case "legExtension":
+      pose = <><path d="M25 73 L83 73" {...metal} /><path d="M31 73 L28 82 M75 73 L78 82" {...metal} /><path d="M37 58 L60 58 L69 69" {...metal} /><path d="M47 53 L55 34 L69 43" {...line} /><path d="M69 43 L78 55" {...line} />{common}</>;
+      break;
+    case "legCurl":
+      pose = <><path d="M25 70 L84 70" {...metal} /><path d="M33 70 L30 81 M76 70 L79 81" {...metal} /><path d="M39 55 L67 55" {...metal} /><path d="M46 51 L59 35 L72 46" {...line} /><path d="M72 46 L64 61" {...line} />{common}</>;
+      break;
+    case "lunge":
+      pose = <><path d="M52 29 L52 51" {...line} /><path d="M52 35 L38 44 M52 35 L66 44" {...line} /><path d="M52 51 L38 62 L24 77 M52 51 L68 59 L85 59" {...line} /><path d="M18 79 L31 79 M80 61 L92 61" {...metal} />{common}</>;
+      break;
+    case "calf":
+      pose = <><path d="M52 29 L52 61" {...line} /><path d="M52 36 L36 45 M52 36 L68 45" {...line} /><path d="M52 61 L43 77 M52 61 L61 77" {...line} /><path d="M35 79 L49 79 M55 79 L69 79" {...metal} /><path d="M32 22 L72 22" {...metal} />{common}</>;
+      break;
+    case "lateralRaise":
+      pose = <><path d="M52 28 L52 57" {...line} /><path d="M52 34 L31 43 L24 50 M52 34 L73 43 L80 50" {...line} /><circle cx="22" cy="52" r="3" fill="#c9c9c9" /><circle cx="82" cy="52" r="3" fill="#c9c9c9" /><path d="M52 57 L43 78 M52 57 L61 78" {...line} />{common}</>;
+      break;
+    case "shoulderPress":
+      pose = <><path d="M52 31 L52 57" {...line} /><path d="M52 36 L38 22 M52 36 L66 22" {...line} /><path d="M34 20 L42 20 M62 20 L70 20" {...metal} /><path d="M52 57 L43 78 M52 57 L61 78" {...line} />{common}</>;
+      break;
+    case "curl":
+      pose = <><path d="M52 29 L52 58" {...line} /><path d="M52 36 L38 47 L46 57 M52 36 L66 47 L58 57" {...line} /><path d="M42 55 L62 55" {...metal} /><path d="M52 58 L43 78 M52 58 L61 78" {...line} />{common}</>;
+      break;
+    case "tricepPushdown":
+      pose = <><path d="M76 10 L76 77" {...metal} /><path d="M72 24 L52 24" {...metal} /><path d="M52 24 L48 40 L48 56" {...line} /><path d="M48 40 L37 47" {...line} /><path d="M48 56 L40 73 M48 56 L58 73" {...line} /><path d="M34 75 L45 75 M55 75 L66 75" {...metal} />{common}</>;
+      break;
+    case "tricepExtension":
+      pose = <><path d="M52 30 L52 59" {...line} /><path d="M52 35 L43 24 L42 15 M52 35 L61 24 L62 15" {...line} /><circle cx="42" cy="13" r="3" fill="#c9c9c9" /><circle cx="62" cy="13" r="3" fill="#c9c9c9" /><path d="M52 59 L43 78 M52 59 L61 78" {...line} />{common}</>;
+      break;
+    case "dip":
+      pose = <><path d="M28 20 L28 78 M76 20 L76 78" {...metal} /><path d="M28 31 L76 31" {...metal} /><path d="M52 37 L52 58" {...line} /><path d="M52 42 L37 31 M52 42 L67 31" {...line} /><path d="M52 58 L42 76 M52 58 L62 76" {...line} />{common}</>;
+      break;
+    case "core":
+      pose = <><path d="M24 66 L79 50" {...line} /><path d="M34 62 L27 77 M55 56 L68 72" {...line} /><path d="M24 79 L37 79 M63 74 L76 74" {...metal} /><circle cx="84" cy="48" r="6" fill="#ff8b8b" stroke="#ff6b6b" strokeWidth="2" /></>;
+      break;
+    case "cardio":
+      pose = <><path d="M25 70 L82 70" {...metal} /><path d="M35 70 L31 80 M73 70 L77 80" {...metal} /><path d="M42 54 L62 54 L69 66" {...metal} /><path d="M52 50 L52 29 M52 33 L37 42 M52 33 L67 42 M52 50 L42 70 M52 50 L63 70" {...line} />{common}</>;
+      break;
+    default:
+      pose = <><path d="M52 29 L52 58 M52 36 L36 45 M52 36 L68 45 M52 58 L43 78 M52 58 L61 78" {...line} />{common}</>;
+  }
+
+  return (
+    <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl border border-red-500/20 bg-gradient-to-br from-red-950/70 via-zinc-900 to-black flex items-center justify-center overflow-hidden shadow-inner shadow-red-500/10">
+      <svg viewBox="0 0 104 92" className="w-full h-full" aria-label={`${name} exercise illustration`} role="img">
+        <defs>
+          <radialGradient id="exerciseGlow" cx="50%" cy="50%" r="70%">
+            <stop offset="0%" stopColor="#3b1515" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#090909" stopOpacity="1" />
+          </radialGradient>
+        </defs>
+        <rect width="104" height="92" rx="16" fill="url(#exerciseGlow)" />
+        {pose}
+      </svg>
+    </div>
+  );
+}
+
 export default function UserDashboard({ user }: UserDashboardProps) {
   const [profile, setProfile] = useState<any>(null);
   const [isPro, setIsPro] = useState(false);
@@ -28,6 +345,7 @@ export default function UserDashboard({ user }: UserDashboardProps) {
   const [weightHistory, setWeightHistory] = useState<any[]>([]);
   const [foodName, setFoodName] = useState('');
   const [quantity, setQuantity] = useState('100');
+
   const [caloriesInput, setCaloriesInput] = useState('');
   const [proteinInput, setProteinInput] = useState('');
   const [carbsInput, setCarbsInput] = useState('');
@@ -35,6 +353,10 @@ export default function UserDashboard({ user }: UserDashboardProps) {
   const [foodLogs, setFoodLogs] = useState<any[]>([]);
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [aiPlan, setAiPlan] = useState<any>(null);
+  const [exerciseWeights, setExerciseWeights] = useState<Record<string, string>>({});
+  const [exerciseReps, setExerciseReps] = useState<Record<string, string>>({});
+
+  // Reusable BodyWise AI popup system
   const [popup, setPopup] = useState<{
     open: boolean;
     type: "message" | "confirm";
@@ -46,6 +368,7 @@ export default function UserDashboard({ user }: UserDashboardProps) {
     title: "",
     message: "",
   });
+
   const [confirmResolver, setConfirmResolver] = useState<
     ((value: boolean) => void) | null
   >(null);
@@ -78,8 +401,6 @@ export default function UserDashboard({ user }: UserDashboardProps) {
     setConfirmResolver(null);
     setPopup((current) => ({ ...current, open: false }));
   };
-  const [exerciseWeights, setExerciseWeights] = useState<Record<string, string>>({});
-  const [exerciseReps, setExerciseReps] = useState<Record<string, string>>({});
 
   const autoFillFood = async (food: string) => {
   if (!food.trim()) {
@@ -162,8 +483,7 @@ export default function UserDashboard({ user }: UserDashboardProps) {
     console.error("AUTO FILL ERROR:", error);
 
     showMessage(
-      "Please check your USDA API key or internet connection and try again.",
-      "Nutrition Data Error"
+      "Unable to fetch nutrition data. Please check your USDA API key or internet connection."
     );
   }
 };
@@ -324,80 +644,128 @@ if (logs) {
       ).toFixed(1)
     : '--';
 
-  const nutritionTargets = (() => {
-  if (
-    !profile?.current_weight_kg ||
-    !profile?.height_cm ||
-    !profile?.age
-  ) {
-    return {
-      calories: "--",
-      protein: "--",
-    };
-  }
+  const getBodyFatPercentage = () => {
+    const candidates = [
+      profile?.body_fat_percentage,
+      profile?.body_fat_percent,
+      profile?.body_fat,
+      profile?.fat_percentage,
+      profile?.bodyfat_percentage,
+      profile?.bodyfat,
+    ];
 
-  const weight = Number(profile.current_weight_kg);
-  const height = Number(profile.height_cm);
-  const age = Number(profile.age);
+    for (const value of candidates) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed) && parsed > 0 && parsed < 70) {
+        return parsed;
+      }
+    }
 
-  // Calculate BMR using Mifflin-St Jeor equation
-  const bmr =
-    10 * weight +
-    6.25 * height -
-    5 * age +
-    (profile.gender?.toLowerCase() === "male" ? 5 : -161);
-
-  // Activity level
-  const activityLevel =
-    profile.activity_level?.toLowerCase() || "sedentary";
-
-  const activityMultiplier =
-    activityLevel === "sedentary"
-      ? 1.2
-      : activityLevel === "light"
-      ? 1.375
-      : activityLevel === "moderate"
-      ? 1.55
-      : activityLevel === "active"
-      ? 1.725
-      : activityLevel === "very_active" ||
-        activityLevel === "very active"
-      ? 1.9
-      : 1.2;
-
-  // Estimated maintenance calories
-  const maintenanceCalories = bmr * activityMultiplier;
-
-  // Adjust calories based on fitness goal
-  const goal =
-    profile.fitness_goal?.toLowerCase() || "maintenance";
-
-  const calories =
-    goal === "fat_loss"
-      ? maintenanceCalories * 0.80
-      : goal === "body_recomposition"
-      ? maintenanceCalories * 0.90
-      : goal === "muscle_gain"
-      ? maintenanceCalories * 1.05
-      : maintenanceCalories;
-
-  // Protein target
-  const proteinMultiplier =
-    goal === "fat_loss"
-      ? 2.2
-      : goal === "body_recomposition"
-      ? 2.2
-      : goal === "muscle_gain"
-      ? 2.0
-      : 1.8;
-
-  const protein = weight * proteinMultiplier;
-
-  return {
-    calories: Math.round(calories),
-    protein: Math.round(protein),
+    return null;
   };
-})();
+
+  const nutritionTargets = (() => {
+    if (
+      !profile?.current_weight_kg ||
+      !profile?.height_cm ||
+      !profile?.age
+    ) {
+      return {
+        calories: "--",
+        protein: "--",
+        maintenance: "--",
+        calorieAdjustment: 0,
+        bodyFat: getBodyFatPercentage(),
+      };
+    }
+
+    const weight = Number(profile.current_weight_kg);
+    const height = Number(profile.height_cm);
+    const age = Number(profile.age);
+
+    // Mifflin-St Jeor BMR
+    const gender = String(profile.gender || "").toLowerCase();
+    const bmr =
+      10 * weight +
+      6.25 * height -
+      5 * age +
+      (gender === "male" ? 5 : -161);
+
+    const activityLevel = String(
+      profile.activity_level || "sedentary"
+    )
+      .toLowerCase()
+      .trim()
+      .replace(/[\s-]+/g, "_");
+
+    const activityMultiplier: Record<string, number> = {
+      sedentary: 1.2,
+      light: 1.375,
+      lightly_active: 1.375,
+      moderate: 1.55,
+      moderately_active: 1.55,
+      active: 1.725,
+      very_active: 1.9,
+      veryactive: 1.9,
+    };
+
+    const maintenanceCalories =
+      bmr * (activityMultiplier[activityLevel] || 1.2);
+
+    const goal = String(profile.fitness_goal || "maintenance")
+      .toLowerCase()
+      .trim()
+      .replace(/[\s-]+/g, "_");
+
+    const bodyFat = getBodyFatPercentage();
+
+    // Goal-based calorie adjustment.
+    // Recomposition uses body-fat bands when a body-fat value is available.
+    let calorieAdjustment = 0;
+
+    if (goal === "fat_loss" || goal === "weight_loss") {
+      calorieAdjustment = -450;
+    } else if (goal === "muscle_gain" || goal === "weight_gain") {
+      calorieAdjustment = 350;
+    } else if (
+      goal === "body_recomposition" ||
+      goal === "body_recomp" ||
+      goal === "recomposition"
+    ) {
+      if (bodyFat !== null) {
+        if (bodyFat > 20) {
+          calorieAdjustment = -250;
+        } else if (bodyFat >= 15) {
+          calorieAdjustment = 0;
+        } else {
+          calorieAdjustment = 250;
+        }
+      } else {
+        // Conservative fallback when body-fat data is unavailable.
+        calorieAdjustment = 0;
+      }
+    }
+
+    const targetCalories = Math.max(
+      1200,
+      Math.round(maintenanceCalories + calorieAdjustment)
+    );
+
+    // Keep protein in the requested 2.0–2.2 g/kg range.
+    // Higher protein is used for fat loss; a middle value is used otherwise.
+    const proteinMultiplier =
+      goal === "fat_loss" || goal === "weight_loss" ? 2.2 : 2.1;
+
+    const protein = Math.round(weight * proteinMultiplier);
+
+    return {
+      calories: targetCalories,
+      protein,
+      maintenance: Math.round(maintenanceCalories),
+      calorieAdjustment,
+      bodyFat,
+    };
+  })();
 
 const calories = nutritionTargets.calories;
 const proteinTarget = nutritionTargets.protein;
@@ -488,7 +856,9 @@ const todayNutrition =
     : '--';
 
  const bodyFat =
-  bmi !== '--' && profile?.age
+  nutritionTargets.bodyFat !== null && nutritionTargets.bodyFat !== undefined
+    ? Number(nutritionTargets.bodyFat).toFixed(1)
+    : bmi !== '--' && profile?.age
     ? (
         1.20 * Number(bmi) +
         0.23 * Number(profile.age) -
@@ -515,6 +885,81 @@ const totalFat = foodLogs.reduce(
   (sum, item) => sum + (item.fat || 0),
   0
 );
+
+    const workoutPlan =
+  profile?.fitness_goal === 'muscle_gain'
+    ? [
+        {
+          day: 'Monday - Push',
+          exercises: [
+            'Bench Press',
+            'Incline Dumbbell Press',
+            'Shoulder Press',
+            'Lateral Raises',
+            'Tricep Pushdowns'
+          ]
+        },
+        {
+          day: 'Tuesday - Pull',
+          exercises: [
+            'Pull Ups',
+            'Barbell Rows',
+            'Lat Pulldown',
+            'Face Pulls',
+            'Barbell Curls'
+          ]
+        },
+        {
+          day: 'Wednesday - Legs',
+          exercises: [
+            'Squats',
+            'Romanian Deadlift',
+            'Leg Press',
+            'Leg Curl',
+            'Standing Calf Raises'
+          ]
+        },
+        {
+          day: 'Thursday - Push',
+          exercises: [
+            'Incline Bench Press',
+            'Machine Chest Press',
+            'Arnold Press',
+            'Cable Lateral Raises',
+            'Overhead Tricep Extension'
+          ]
+        },
+        {
+          day: 'Friday - Pull',
+          exercises: [
+            'Deadlift',
+            'Seated Cable Row',
+            'Lat Pulldown',
+            'Hammer Curl',
+            'Preacher Curl'
+          ]
+        },
+        {
+          day: 'Saturday - Legs',
+          exercises: [
+            'Hack Squat',
+            'Bulgarian Split Squat',
+            'Leg Extension',
+            'Leg Curl',
+            'Seated Calf Raises'
+          ]
+        },
+        {
+          day: 'Sunday - Recovery',
+          exercises: [
+            'Walking',
+            'Stretching',
+            'Foam Rolling',
+            'Mobility Work'
+          ]
+        }
+      ]
+    : [];
 
     const mealPlan =
   profile?.fitness_goal === 'muscle_gain'
@@ -650,7 +1095,7 @@ async function logWorkout() {
     }
   }
 
-  showMessage("Your workout has been successfully logged.", "Workout Logged Successfully!");
+  showMessage("Your workout has been successfully logged.", "Workout Logged!");
 
 }
 
@@ -812,7 +1257,7 @@ const deleteWorkout = async (workoutId: string) => {
   if (!user) return;
 
   const confirmed = await showConfirm(
-    "⚠️ Are you sure you want to delete this workout?",
+    "Are you sure you want to delete this workout?",
     "Delete Workout"
   );
 
@@ -844,7 +1289,7 @@ const deleteWorkout = async (workoutId: string) => {
     prev.filter((workout) => workout.id !== workoutId)
   );
 
-  showMessage("Your workout has been successfully deleted.", "Workout Deleted!");
+  showMessage("✅ Workout deleted successfully!");
 };
 
 const saveFoodLog = async () => {
@@ -937,14 +1382,14 @@ function generateExercisesForWorkout(
   const isFatLoss = fitnessGoal === "fat_loss";
 
   let exercises: any[] = [];
-// =========================================================
-// PUSH
-// =========================================================
 
-if (workoutType === "Push") {
+  // =========================================================
+  // PUSH
+  // =========================================================
+
+  if (workoutType === "Push") {
   if (location === "home") {
     exercises = [
-      // CHEST — 4
       {
         name: "Push-Ups",
         sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
@@ -969,22 +1414,12 @@ if (workoutType === "Push") {
         reps: "10-15",
         rest: "60 sec",
       },
-
-      // SHOULDERS — 2
       {
         name: "Pike Push-Ups",
         sets: isAdvanced ? 3 : 2,
         reps: "8-12",
         rest: "75 sec",
       },
-      {
-        name: "Dumbbell Lateral Raises",
-        sets: 3,
-        reps: "12-15",
-        rest: "60 sec",
-      },
-
-      // TRICEPS — 2
       {
         name: "Chair Tricep Dips",
         sets: 3,
@@ -1000,7 +1435,6 @@ if (workoutType === "Push") {
     ];
   } else {
     exercises = [
-      // CHEST — 4
       {
         name: "Bench Press",
         sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
@@ -1025,22 +1459,12 @@ if (workoutType === "Push") {
         reps: "12-15",
         rest: "60 sec",
       },
-
-      // SHOULDERS — 2
-      {
-        name: "Machine Shoulder Press",
-        sets: 3,
-        reps: "8-12",
-        rest: "75 sec",
-      },
       {
         name: "Lateral Raises",
         sets: 3,
         reps: "12-15",
         rest: "60 sec",
       },
-
-      // TRICEPS — 2
       {
         name: "Tricep Pushdowns",
         sets: 3,
@@ -1057,15 +1481,13 @@ if (workoutType === "Push") {
   }
 }
 
+  // =========================================================
+  // PULL
+  // =========================================================
 
-// =========================================================
-// PULL
-// =========================================================
-
-else if (workoutType === "Pull") {
+  else if (workoutType === "Pull") {
   if (location === "home") {
     exercises = [
-      // BACK — 4
       {
         name: "Resistance Band Rows",
         sets: isAdvanced ? 4 : 3,
@@ -1090,22 +1512,12 @@ else if (workoutType === "Pull") {
         reps: "10-15",
         rest: "60 sec",
       },
-
-      // REAR DELTS + TRAPS — 2
       {
         name: "Dumbbell Reverse Fly",
         sets: 3,
         reps: "12-15",
         rest: "60 sec",
       },
-      {
-        name: "Dumbbell Shrugs",
-        sets: 3,
-        reps: "10-15",
-        rest: "60 sec",
-      },
-
-      // BICEPS — 2
       {
         name: "Dumbbell Curls",
         sets: 3,
@@ -1121,7 +1533,6 @@ else if (workoutType === "Pull") {
     ];
   } else {
     exercises = [
-      // BACK — 4
       {
         name: "Lat Pulldown",
         sets: isBeginner ? 3 : 4,
@@ -1146,22 +1557,12 @@ else if (workoutType === "Pull") {
         reps: "10-15",
         rest: "60 sec",
       },
-
-      // REAR DELTS + TRAPS — 2
       {
         name: "Face Pull",
         sets: 3,
         reps: "12-15",
         rest: "60 sec",
       },
-      {
-        name: "Dumbbell Shrugs",
-        sets: 3,
-        reps: "10-15",
-        rest: "75 sec",
-      },
-
-      // BICEPS — 2
       {
         name: "Dumbbell Curl",
         sets: 3,
@@ -1534,49 +1935,31 @@ else if (workoutType === "Pull") {
   // FULL BODY
   // =========================================================
 
-   else if (workoutType === "Full Body") {
+  else if (workoutType === "Full Body") {
     if (location === "home") {
       exercises = [
         {
-          name: "Goblet Squat",
-          sets: isBeginner ? 3 : isAdvanced ? 4 : 3,
-          reps: "8-12",
-          rest: isAdvanced ? "90 sec" : "75 sec",
-        },
-        {
-          name: "Dumbbell Romanian Deadlift",
-          sets: isBeginner ? 2 : 3,
-          reps: "8-12",
-          rest: "75 sec",
-        },
-        {
-          name: "Dumbbell Floor Press",
+          name: "Bodyweight Squats",
           sets: 3,
-          reps: "8-12",
-          rest: "75 sec",
+          reps: "10-15",
+          rest: "60 sec",
         },
         {
-          name: "One-Arm Dumbbell Row",
-          sets: isAdvanced ? 4 : 3,
-          reps: "8-12 each side",
-          rest: "75 sec",
+          name: "Push-Ups",
+          sets: 3,
+          reps: "8-15",
+          rest: "60 sec",
         },
         {
-          name: "Dumbbell Lateral Raise",
+          name: "Resistance Band Rows",
+          sets: 3,
+          reps: "10-15",
+          rest: "60 sec",
+        },
+        {
+          name: "Glute Bridges",
           sets: 3,
           reps: "12-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Dumbbell Curl",
-          sets: 2,
-          reps: "10-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Overhead Dumbbell Tricep Extension",
-          sets: 2,
-          reps: "10-15",
           rest: "60 sec",
         },
       ];
@@ -1589,16 +1972,10 @@ else if (workoutType === "Pull") {
           rest: isAdvanced ? "120 sec" : "90 sec",
         },
         {
-          name: "Romanian Deadlift",
-          sets: isBeginner ? 2 : 3,
-          reps: "8-12",
-          rest: isAdvanced ? "120 sec" : "90 sec",
-        },
-        {
           name: "Bench Press",
           sets: 3,
-          reps: "6-10",
-          rest: isAdvanced ? "120 sec" : "90 sec",
+          reps: "8-12",
+          rest: "90 sec",
         },
         {
           name: "Lat Pulldown",
@@ -1607,28 +1984,10 @@ else if (workoutType === "Pull") {
           rest: "75 sec",
         },
         {
-          name: "Seated Cable Row",
-          sets: 3,
+          name: "Romanian Deadlift",
+          sets: isBeginner ? 2 : 3,
           reps: "8-12",
-          rest: "75 sec",
-        },
-        {
-          name: "Lateral Raises",
-          sets: 3,
-          reps: "12-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Cable Curl",
-          sets: 2,
-          reps: "10-15",
-          rest: "60 sec",
-        },
-        {
-          name: "Tricep Pushdown",
-          sets: 2,
-          reps: "10-15",
-          rest: "60 sec",
+          rest: "90 sec",
         },
       ];
     }
@@ -1703,17 +2062,17 @@ function adjustExercisesForInjury(exercises: any[], injury: string) {
       },
 
       "Lateral Raises": {
-        name: "Cable Lateral Raises",
+        name: "Cable Chest Fly",
         sets: 3,
         reps: "10-15",
         rest: "60 sec",
       },
 
       "Shoulder Press": {
-         name: "Machine Shoulder Press",
+        name: "Cable Chest Fly",
         sets: 3,
-        reps: "8-12",
-        rest: "75 sec",
+        reps: "10-15",
+        rest: "60 sec",
       },
 
       "Pike Push-Ups": {
@@ -2300,45 +2659,9 @@ async function handleGenerateAIPlan() {
 
 console.log("AI USER CONTEXT:", userContext);
 
-const generatedWeeklyPlan = generateWorkoutPlan(profile);
-
-// Safety check: prevent duplicate exercise names within the same workout day
-const personalizedWeeklyPlan = generatedWeeklyPlan.map((day: any) => {
-  const uniqueExercises = Array.from(
-    new Map(
-      (day.exercises || []).map((exercise: any) => [
-        exercise.name,
-        exercise,
-      ])
-    ).values()
-  );
-
-  return {
-    ...day,
-    exercises: uniqueExercises,
-  };
-});
+const personalizedWeeklyPlan = generateWorkoutPlan(profile);
 
 console.log("PERSONALIZED WEEKLY PLAN:", personalizedWeeklyPlan);
-
-// Debug duplicate check
-personalizedWeeklyPlan.forEach((day: any) => {
-  const names = (day.exercises || []).map(
-    (exercise: any) => exercise.name
-  );
-
-  const duplicates = names.filter(
-    (name: string, index: number) =>
-      names.indexOf(name) !== index
-  );
-
-  if (duplicates.length > 0) {
-    console.warn(
-      `Duplicate exercises found on ${day.day}:`,
-      duplicates
-    );
-  }
-});
 
 const FOOD_DATABASE = {
   "Oats": {
@@ -2607,909 +2930,475 @@ const FOOD_DATABASE = {
   await new Promise((resolve) => setTimeout(resolve, 3000));
 
   function generateNutritionMeals(
-  profile: any,
-  calories: number | string,
-  proteinTarget: number | string
-) {
-  const diet = String(profile?.diet_preference || "")
-    .toLowerCase()
-    .trim()
-    .replace(/[\s-]+/g, "_");
+    profile: any,
+    calories: number | string,
+    proteinTarget: number | string
+  ) {
+    const dailyCalories = Number(calories) || 0;
+    const dailyProtein = Number(proteinTarget) || 0;
 
-  const dailyCalories = Number(calories) || 0;
-const dailyProtein = Number(proteinTarget) || 0;
+    const diet = String(profile?.diet_preference || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[\s-]+/g, "_");
 
-const requestedMeals = Number(
-  profile?.meals_per_day || 3
-);
+    const requestedMeals = Math.max(
+      3,
+      Math.min(5, Number(profile?.meals_per_day) || 3)
+    );
 
-const mealsPerDay =
-  dailyProtein > 200
-    ? 5
-    : dailyProtein >= 160
-    ? Math.max(
-        4,
-        Math.min(5, requestedMeals)
-      )
-    : Math.max(
-        3,
-        Math.min(5, requestedMeals)
-      );
+    const allergies = String(profile?.food_allergies || "").toLowerCase();
+    const restrictions = String(profile?.food_restrictions || "").toLowerCase();
 
-const allergies = String(
-  profile?.food_allergies || ""
-).toLowerCase();
-
-const restrictions = String(
-  profile?.food_restrictions || ""
-).toLowerCase();
-
-  const isVegan = diet === "vegan";
-  const isVegetarian =
-    diet === "vegetarian" || diet === "veg";
-
-  // Non-vegetarian users can eat BOTH vegetarian
-  // and non-vegetarian foods.
-
-
-  const avoidFood = (food: string) => {
-    const text = food.toLowerCase();
+    const isVegan = diet === "vegan";
+    const isVegetarian = diet === "vegetarian" || diet === "veg";
 
     const allergyList = allergies
       .split(",")
-      .map((item) => item.trim())
+      .map((item: string) => item.trim())
       .filter(Boolean);
-
     const restrictionList = restrictions
       .split(",")
-      .map((item) => item.trim())
+      .map((item: string) => item.trim())
       .filter(Boolean);
 
-    return [...allergyList, ...restrictionList].some(
-      (item) => item && text.includes(item)
-    );
-  };
+    const avoidFood = (food: string) => {
+      const text = String(food).toLowerCase();
+      return [...allergyList, ...restrictionList].some(
+        (item) => item && text.includes(item)
+      );
+    };
 
-  const calculateFood = (
-    name: string,
-    quantity: number,
-    unit: string
-  ) => {
-    const food =
-      FOOD_DATABASE[
-        name as keyof typeof FOOD_DATABASE
-      ];
+    const calculateFood = (
+      name: string,
+      quantity: number,
+      unit: string
+    ) => {
+      const food = FOOD_DATABASE[name as keyof typeof FOOD_DATABASE];
 
-    if (!food) {
+      if (!food) {
+        return {
+          name,
+          quantity,
+          unit,
+          calories: 0,
+          protein: 0,
+          carbs: 0,
+          fat: 0,
+        };
+      }
+
+      const isSingleServing =
+        food.unit === "1 egg" || food.unit === "1 medium";
+
+      const multiplier = isSingleServing ? quantity : quantity / 100;
+
       return {
         name,
         quantity,
         unit,
-        calories: 0,
-        protein: 0,
-        carbs: 0,
-        fat: 0,
+        calories: Math.round(food.calories * multiplier),
+        protein: Number((food.protein * multiplier).toFixed(1)),
+        carbs: Number((food.carbs * multiplier).toFixed(1)),
+        fat: Number((food.fat * multiplier).toFixed(1)),
       };
-    }
-
-    const isSingleServing =
-      food.unit === "1 egg" ||
-      food.unit === "1 medium";
-
-    const multiplier = isSingleServing
-      ? quantity
-      : quantity / 100;
-
-    return {
-      name,
-      quantity,
-      unit,
-      calories: Math.round(food.calories * multiplier),
-      protein: Number(
-        (food.protein * multiplier).toFixed(1)
-      ),
-      carbs: Number(
-        (food.carbs * multiplier).toFixed(1)
-      ),
-      fat: Number(
-        (food.fat * multiplier).toFixed(1)
-      ),
     };
-  };
 
-  const vegetarianMeals = [
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Milk", 250, "ml"],
-          ["Banana", 1, "medium"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Rice", 180, "g cooked"],
-          ["Paneer", 150, "g"],
-          ["Dal", 150, "g cooked"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Greek Yogurt", 200, "g"],
-          ["Apple", 1, "medium"],
-          ["Almonds", 20, "g"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Paneer", 120, "g"],
-          ["Rice", 150, "g cooked"],
-          ["Vegetables", 200, "g"],
-          ["Curd", 150, "g"],
-        ],
-      },
-    ],
+    const vegetarianMeals = [
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Milk", 250, "ml"], ["Banana", 1, "medium"]] },
+        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Paneer", 150, "g"], ["Dal", 150, "g cooked"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Apple", 1, "medium"], ["Almonds", 20, "g"]] },
+        { name: "Dinner", foods: [["Paneer", 120, "g"], ["Rice", 150, "g cooked"], ["Vegetables", 200, "g"], ["Curd", 150, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]] },
+        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Chickpeas", 180, "g cooked"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Curd", 200, "g"], ["Apple", 1, "medium"], ["Almonds", 20, "g"]] },
+        { name: "Dinner", foods: [["Paneer", 150, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Milk", 250, "ml"], ["Apple", 1, "medium"], ["Almonds", 15, "g"]] },
+        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Rajma", 180, "g cooked"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]] },
+        { name: "Dinner", foods: [["Paneer", 150, "g"], ["Dal", 150, "g cooked"], ["Salad", 150, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Soy Milk", 250, "ml"], ["Berries", 100, "g"]] },
+        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Tofu", 180, "g"], ["Dal", 150, "g cooked"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Apple", 1, "medium"]] },
+        { name: "Dinner", foods: [["Paneer", 120, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Milk", 250, "ml"], ["Banana", 1, "medium"], ["Peanut Butter", 15, "g"]] },
+        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Dal", 200, "g cooked"], ["Paneer", 120, "g"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Curd", 200, "g"], ["Apple", 1, "medium"], ["Almonds", 15, "g"]] },
+        { name: "Dinner", foods: [["Tofu", 200, "g"], ["Rice", 150, "g cooked"], ["Vegetables", 200, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Greek Yogurt", 200, "g"], ["Berries", 100, "g"], ["Almonds", 15, "g"]] },
+        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Rajma", 180, "g cooked"], ["Paneer", 100, "g"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Milk", 250, "ml"], ["Banana", 1, "medium"]] },
+        { name: "Dinner", foods: [["Paneer", 150, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Milk", 250, "ml"], ["Apple", 1, "medium"]] },
+        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Chickpeas", 180, "g cooked"], ["Paneer", 120, "g"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"], ["Almonds", 15, "g"]] },
+        { name: "Dinner", foods: [["Tofu", 180, "g"], ["Rice", 150, "g cooked"], ["Vegetables", 200, "g"]] },
+      ],
+    ];
 
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Greek Yogurt", 200, "g"],
-          ["Banana", 1, "medium"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Rice", 180, "g cooked"],
-          ["Chickpeas", 180, "g cooked"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Curd", 200, "g"],
-          ["Apple", 1, "medium"],
-          ["Almonds", 20, "g"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Paneer", 150, "g"],
-          ["Sweet Potato", 200, "g"],
-          ["Salad", 150, "g"],
-        ],
-      },
-    ],
+    const nonVegetarianMeals = [
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Eggs", 3, "eggs"], ["Banana", 1, "medium"]] },
+        { name: "Lunch", foods: [["Chicken", 150, "g"], ["Rice", 180, "g cooked"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Apple", 1, "medium"], ["Almonds", 20, "g"]] },
+        { name: "Dinner", foods: [["Fish", 150, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Eggs", 3, "eggs"], ["Apple", 1, "medium"]] },
+        { name: "Lunch", foods: [["Chicken", 150, "g"], ["Rice", 180, "g cooked"], ["Dal", 150, "g cooked"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]] },
+        { name: "Dinner", foods: [["Fish", 160, "g"], ["Rice", 150, "g cooked"], ["Salad", 150, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Milk", 250, "ml"], ["Eggs", 2, "eggs"], ["Banana", 1, "medium"]] },
+        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Chicken", 150, "g"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Almonds", 20, "g"]] },
+        { name: "Dinner", foods: [["Paneer", 120, "g"], ["Fish", 120, "g"], ["Salad", 150, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]] },
+        { name: "Lunch", foods: [["Chicken", 170, "g"], ["Rice", 180, "g cooked"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Milk", 250, "ml"], ["Apple", 1, "medium"], ["Almonds", 15, "g"]] },
+        { name: "Dinner", foods: [["Fish", 150, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Eggs", 3, "eggs"], ["Apple", 1, "medium"], ["Milk", 200, "ml"]] },
+        { name: "Lunch", foods: [["Chicken", 150, "g"], ["Rice", 180, "g cooked"], ["Dal", 150, "g cooked"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]] },
+        { name: "Dinner", foods: [["Paneer", 100, "g"], ["Fish", 150, "g"], ["Salad", 150, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Eggs", 2, "eggs"], ["Greek Yogurt", 150, "g"], ["Banana", 1, "medium"]] },
+        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Chicken", 170, "g"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Milk", 250, "ml"], ["Apple", 1, "medium"], ["Almonds", 15, "g"]] },
+        { name: "Dinner", foods: [["Fish", 160, "g"], ["Rice", 150, "g cooked"], ["Salad", 150, "g"]] },
+      ],
+      [
+        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Eggs", 3, "eggs"], ["Banana", 1, "medium"]] },
+        { name: "Lunch", foods: [["Chicken", 150, "g"], ["Rice", 180, "g cooked"], ["Chickpeas", 120, "g cooked"], ["Vegetables", 150, "g"]] },
+        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Apple", 1, "medium"], ["Almonds", 15, "g"]] },
+        { name: "Dinner", foods: [["Fish", 150, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
+      ],
+    ];
 
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Milk", 250, "ml"],
-          ["Apple", 1, "medium"],
-          ["Almonds", 15, "g"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Rice", 180, "g cooked"],
-          ["Rajma", 180, "g cooked"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Greek Yogurt", 200, "g"],
-          ["Banana", 1, "medium"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Paneer", 150, "g"],
-          ["Dal", 150, "g cooked"],
-          ["Salad", 150, "g"],
-        ],
-      },
-    ],
+    const veganAllowed = new Set([
+      "Oats", "Soy Milk", "Banana", "Rice", "Tofu", "Dal",
+      "Vegetables", "Soy Yogurt", "Apple", "Almonds", "Soy Chunks",
+      "Sweet Potato", "Salad", "Chickpeas", "Rajma", "Berries",
+      "Nuts", "Peanut Butter", "Lentils", "Potato", "Spinach", "Fruit",
+    ]);
 
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Soy Milk", 250, "ml"],
-          ["Berries", 100, "g"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Rice", 180, "g cooked"],
-          ["Tofu", 180, "g"],
-          ["Dal", 150, "g cooked"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Greek Yogurt", 200, "g"],
-          ["Apple", 1, "medium"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Paneer", 120, "g"],
-          ["Sweet Potato", 200, "g"],
-          ["Salad", 150, "g"],
-        ],
-      },
-    ],
-
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Milk", 250, "ml"],
-          ["Banana", 1, "medium"],
-          ["Peanut Butter", 15, "g"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Rice", 180, "g cooked"],
-          ["Dal", 200, "g cooked"],
-          ["Paneer", 120, "g"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Curd", 200, "g"],
-          ["Apple", 1, "medium"],
-          ["Almonds", 15, "g"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Tofu", 200, "g"],
-          ["Rice", 150, "g cooked"],
-          ["Vegetables", 200, "g"],
-        ],
-      },
-    ],
-
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Greek Yogurt", 200, "g"],
-          ["Berries", 100, "g"],
-          ["Almonds", 15, "g"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Rice", 180, "g cooked"],
-          ["Rajma", 180, "g cooked"],
-          ["Paneer", 100, "g"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Milk", 250, "ml"],
-          ["Banana", 1, "medium"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Paneer", 150, "g"],
-          ["Sweet Potato", 200, "g"],
-          ["Salad", 150, "g"],
-        ],
-      },
-    ],
-
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Milk", 250, "ml"],
-          ["Apple", 1, "medium"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Rice", 180, "g cooked"],
-          ["Chickpeas", 180, "g cooked"],
-          ["Paneer", 120, "g"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Greek Yogurt", 200, "g"],
-          ["Banana", 1, "medium"],
-          ["Almonds", 15, "g"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Tofu", 180, "g"],
-          ["Rice", 150, "g cooked"],
-          ["Vegetables", 200, "g"],
-        ],
-      },
-    ],
-  ];
-
-  const nonVegetarianMeals = [
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Eggs", 3, "eggs"],
-          ["Banana", 1, "medium"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Chicken", 150, "g"],
-          ["Rice", 180, "g cooked"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Greek Yogurt", 200, "g"],
-          ["Apple", 1, "medium"],
-          ["Almonds", 20, "g"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Fish", 150, "g"],
-          ["Sweet Potato", 200, "g"],
-          ["Salad", 150, "g"],
-        ],
-      },
-    ],
-
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Eggs", 3, "eggs"],
-          ["Apple", 1, "medium"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Chicken", 150, "g"],
-          ["Rice", 180, "g cooked"],
-          ["Dal", 150, "g cooked"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Greek Yogurt", 200, "g"],
-          ["Banana", 1, "medium"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Fish", 160, "g"],
-          ["Rice", 150, "g cooked"],
-          ["Salad", 150, "g"],
-        ],
-      },
-    ],
-
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Milk", 250, "ml"],
-          ["Eggs", 2, "eggs"],
-          ["Banana", 1, "medium"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Rice", 180, "g cooked"],
-          ["Chicken", 150, "g"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Greek Yogurt", 200, "g"],
-          ["Almonds", 20, "g"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Paneer", 120, "g"],
-          ["Fish", 120, "g"],
-          ["Salad", 150, "g"],
-        ],
-      },
-    ],
-
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Greek Yogurt", 200, "g"],
-          ["Banana", 1, "medium"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Chicken", 170, "g"],
-          ["Rice", 180, "g cooked"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Milk", 250, "ml"],
-          ["Apple", 1, "medium"],
-          ["Almonds", 15, "g"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Fish", 150, "g"],
-          ["Sweet Potato", 200, "g"],
-          ["Salad", 150, "g"],
-        ],
-      },
-    ],
-
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Eggs", 3, "eggs"],
-          ["Apple", 1, "medium"],
-          ["Milk", 200, "ml"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Chicken", 150, "g"],
-          ["Rice", 180, "g cooked"],
-          ["Dal", 150, "g cooked"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Greek Yogurt", 200, "g"],
-          ["Banana", 1, "medium"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Paneer", 100, "g"],
-          ["Fish", 150, "g"],
-          ["Salad", 150, "g"],
-        ],
-      },
-    ],
-
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Eggs", 2, "eggs"],
-          ["Greek Yogurt", 150, "g"],
-          ["Banana", 1, "medium"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Rice", 180, "g cooked"],
-          ["Chicken", 170, "g"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Milk", 250, "ml"],
-          ["Apple", 1, "medium"],
-          ["Almonds", 15, "g"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Fish", 160, "g"],
-          ["Rice", 150, "g cooked"],
-          ["Salad", 150, "g"],
-        ],
-      },
-    ],
-
-    [
-      {
-        name: "Breakfast",
-        foods: [
-          ["Oats", 60, "g"],
-          ["Eggs", 3, "eggs"],
-          ["Banana", 1, "medium"],
-        ],
-      },
-      {
-        name: "Lunch",
-        foods: [
-          ["Chicken", 150, "g"],
-          ["Rice", 180, "g cooked"],
-          ["Chickpeas", 120, "g cooked"],
-          ["Vegetables", 150, "g"],
-        ],
-      },
-      {
-        name: "Snack",
-        foods: [
-          ["Greek Yogurt", 200, "g"],
-          ["Apple", 1, "medium"],
-          ["Almonds", 15, "g"],
-        ],
-      },
-      {
-        name: "Dinner",
-        foods: [
-          ["Fish", 150, "g"],
-          ["Sweet Potato", 200, "g"],
-          ["Salad", 150, "g"],
-        ],
-      },
-    ],
-  ];
-
-  // Vegan users get only vegan foods.
-  // Vegetarian users get vegetarian foods.
-  // Non-vegetarian users can receive both veg and non-veg meals.
-  const weeklyTemplates = isVegan
-    ? vegetarianMeals.map((day) =>
-        day.map((meal) => ({
-          ...meal,
-          foods: meal.foods.filter(
-            (food: any) =>
-              ["Oats", "Soy Milk", "Banana", "Rice", "Tofu",
-               "Dal", "Vegetables", "Soy Yogurt", "Apple",
-               "Almonds", "Soy Chunks", "Sweet Potato",
-               "Salad", "Chickpeas", "Rajma", "Berries",
-               "Nuts", "Peanut Butter", "Lentils"]
-                .includes(food[0])
-          ),
-        }))
-      )
-    : isVegetarian
-    ? vegetarianMeals
-    : nonVegetarianMeals.map((day, dayIndex) => {
-        // Non-vegetarian users get a mixture of
-        // vegetarian and non-vegetarian meals.
-        if (dayIndex % 2 === 1) {
-          return day.map((meal, mealIndex) => ({
+    const weeklyTemplates = isVegan
+      ? vegetarianMeals.map((day) =>
+          day.map((meal) => ({
             ...meal,
-            foods:
-              mealIndex === 0 || mealIndex === 2
-                ? vegetarianMeals[dayIndex][mealIndex].foods
-                : meal.foods,
-          }));
-        }
+            foods: meal.foods.filter((food: any[]) => veganAllowed.has(food[0])),
+          }))
+        )
+      : isVegetarian
+      ? vegetarianMeals
+      : nonVegetarianMeals.map((day, dayIndex) => {
+          if (dayIndex % 2 === 1) {
+            return day.map((meal, mealIndex) => ({
+              ...meal,
+              foods:
+                mealIndex === 0 || mealIndex === 2
+                  ? vegetarianMeals[dayIndex][mealIndex].foods
+                  : meal.foods,
+            }));
+          }
+          return day;
+        });
 
-        return day;
-      });
+    const dayNames = [
+      "Monday", "Tuesday", "Wednesday", "Thursday",
+      "Friday", "Saturday", "Sunday",
+    ];
 
-  const dayNames = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
+    const proteinPriority = [
+      "Chicken", "Fish", "Eggs", "Greek Yogurt", "Soy Chunks",
+      "Tofu", "Paneer", "Dal", "Lentils", "Chickpeas", "Rajma",
+    ];
 
-  const weeklyPlan = weeklyTemplates.map(
-    (dayTemplate, dayIndex) => {
+    const calorieFlexibleFoods = [
+      "Rice", "Oats", "Sweet Potato", "Potato", "Banana",
+      "Peanut Butter", "Almonds", "Nuts", "Fruit", "Berries",
+      "Vegetables", "Salad",
+    ];
+
+    const getFoodStep = (name: string) => {
+      if (name === "Banana" || name === "Apple") return 1;
+      if (name === "Eggs") return 1;
+      if (name === "Peanut Butter" || name === "Almonds" || name === "Nuts") return 5;
+      if (name === "Oats") return 10;
+      if (name === "Rice" || name === "Sweet Potato" || name === "Potato") return 25;
+      if (name === "Vegetables" || name === "Salad" || name === "Berries" || name === "Fruit") return 25;
+      return 25;
+    };
+
+    const getFoodMax = (name: string) => {
+      if (name === "Banana") return 3;
+      if (name === "Apple") return 2;
+      if (name === "Eggs") return 6;
+      if (name === "Peanut Butter") return 60;
+      if (name === "Almonds" || name === "Nuts") return 60;
+      if (name === "Oats") return 120;
+      if (name === "Rice") return 450;
+      if (name === "Sweet Potato" || name === "Potato") return 450;
+      if (name === "Vegetables" || name === "Salad") return 400;
+      if (name === "Berries" || name === "Fruit") return 250;
+      return 400;
+    };
+
+    const getFoodMin = (name: string) => {
+      if (name === "Banana" || name === "Apple" || name === "Eggs") return 0;
+      if (name === "Peanut Butter" || name === "Almonds" || name === "Nuts") return 0;
+      return 0;
+    };
+
+    const recalculateMeal = (meal: any) => {
+      const foods = meal.foods
+        .map((food: any) => {
+          // Meal templates use tuple format: [name, quantity, unit].
+          // Normalize tuples and object-shaped foods into one safe format.
+          if (Array.isArray(food)) {
+            return calculateFood(
+              String(food[0] || ""),
+              Number(food[1]) || 0,
+              String(food[2] || "g")
+            );
+          }
+
+          return calculateFood(
+            String(food?.name || ""),
+            Number(food?.quantity) || 0,
+            String(food?.unit || "g")
+          );
+        })
+        .filter((food: any) => food.name);
+      return {
+        ...meal,
+        foods,
+        calories: Math.round(foods.reduce((sum: number, food: any) => sum + food.calories, 0)),
+        protein: Number(foods.reduce((sum: number, food: any) => sum + food.protein, 0).toFixed(1)),
+        carbs: Number(foods.reduce((sum: number, food: any) => sum + food.carbs, 0).toFixed(1)),
+        fat: Number(foods.reduce((sum: number, food: any) => sum + food.fat, 0).toFixed(1)),
+      };
+    };
+
+    const weeklyPlan = weeklyTemplates.map((dayTemplate, dayIndex) => {
       let selectedMeals = dayTemplate
         .map((meal: any) => ({
           ...meal,
-          foods: meal.foods.filter(
-            (food: any) => !avoidFood(food[0])
-          ),
+          // Keep the original tuple data here; recalculateMeal() below
+          // converts every food into the dashboard's object format.
+          foods: meal.foods.filter((food: any) => {
+            const foodName = Array.isArray(food)
+              ? food[0]
+              : food?.name;
+            return foodName && !avoidFood(String(foodName));
+          }),
         }))
-        .slice(0, mealsPerDay);
+        .slice(0, Math.min(4, requestedMeals));
 
-      if (mealsPerDay >= 5) {
+      // Add a dedicated pre/post workout meal only when the user selected 5 meals.
+      if (requestedMeals === 5) {
         selectedMeals.splice(3, 0, {
           name: "Pre/Post Workout",
           foods: isVegan
-            ? [
-                ["Soy Milk", 250, "ml"],
-                ["Banana", 1, "medium"],
-              ]
-            : [
-                ["Greek Yogurt", 200, "g"],
-                ["Banana", 1, "medium"],
-              ],
+            ? [["Soy Milk", 250, "ml"], ["Banana", 1, "medium"]]
+            : [["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]],
         });
       }
 
-      let meals = selectedMeals.map((meal: any) => {
-  const foods = meal.foods.map((food: any[]) =>
-    calculateFood(
-      food[0],
-      food[1],
-      food[2]
-    )
-  );
+      // If allergy/restriction filtering removed all foods from a meal,
+      // keep the meal but let the balancing logic work with the remaining foods.
+      let meals = selectedMeals.map(recalculateMeal);
 
-  const mealCalories = foods.reduce(
-    (sum: number, food: any) =>
-      sum + food.calories,
-    0
-  );
+      const getDailyTotals = () =>
+        meals.reduce(
+          (totals: any, meal: any) => ({
+            calories: totals.calories + meal.calories,
+            protein: totals.protein + meal.protein,
+            carbs: totals.carbs + meal.carbs,
+            fat: totals.fat + meal.fat,
+          }),
+          { calories: 0, protein: 0, carbs: 0, fat: 0 }
+        );
 
-  const mealProtein = foods.reduce(
-    (sum: number, food: any) =>
-      sum + food.protein,
-    0
-  );
+      // ---------------------------------------------------------
+      // 1. Protein target: add protein-rich foods/quantities first.
+      // ---------------------------------------------------------
+      for (let iteration = 0; iteration < 150; iteration++) {
+        const totals = getDailyTotals();
+        if (totals.protein >= dailyProtein - 1) break;
 
-  const mealCarbs = foods.reduce(
-    (sum: number, food: any) =>
-      sum + food.carbs,
-    0
-  );
+        let bestMeal = -1;
+        let bestFood = -1;
+        let bestGain = 0;
+        let replacement: any = null;
 
-  const mealFat = foods.reduce(
-    (sum: number, food: any) =>
-      sum + food.fat,
-    0
-  );
+        meals.forEach((meal: any, mealIndex: number) => {
+          meal.foods.forEach((food: any, foodIndex: number) => {
+            if (!proteinPriority.includes(food.name)) return;
 
-  return {
-    name: meal.name,
-    foods,
-    calories: Math.round(mealCalories),
-    protein: Number(
-      mealProtein.toFixed(1)
-    ),
-    carbs: Number(
-      mealCarbs.toFixed(1)
-    ),
-    fat: Number(
-      mealFat.toFixed(1)
-    ),
-  };
-});
+            const step = food.name === "Eggs" ? 1 : food.name === "Greek Yogurt" ? 50 : 25;
+            if (food.quantity + step > getFoodMax(food.name)) return;
 
-/* ================================
-   SMART PROTEIN TARGET BALANCING
-================================ */
+            const next = calculateFood(food.name, food.quantity + step, food.unit);
+            const gain = next.protein - food.protein;
 
-const getDailyProtein = () =>
-  meals.reduce(
-    (total: number, meal: any) =>
-      total +
-      meal.foods.reduce(
-        (sum: number, food: any) =>
-          sum + food.protein,
-        0
-      ),
-    0
-  );
+            if (gain > bestGain) {
+              bestGain = gain;
+              bestMeal = mealIndex;
+              bestFood = foodIndex;
+              replacement = next;
+            }
+          });
+        });
 
-const proteinPriority = [
-  "Chicken",
-  "Fish",
-  "Eggs",
-  "Greek Yogurt",
-  "Soy Chunks",
-  "Tofu",
-  "Paneer",
-  "Dal",
-  "Lentils",
-  "Chickpeas",
-  "Rajma",
-];
+        if (bestMeal < 0 || bestFood < 0 || !replacement) break;
+        meals[bestMeal].foods[bestFood] = replacement;
+        meals[bestMeal] = recalculateMeal(meals[bestMeal]);
+      }
 
-const getProteinStep = (food: any) => {
-  if (food.name === "Eggs") return 1;
-  if (food.name === "Greek Yogurt") return 50;
-  if (food.name === "Chicken") return 25;
-  if (food.name === "Fish") return 25;
-  if (food.name === "Soy Chunks") return 25;
-  if (food.name === "Tofu") return 25;
-  if (food.name === "Paneer") return 25;
-  return 50;
-};
+      // ---------------------------------------------------------
+      // 2. Calorie target: raise/lower calories primarily through
+      //    carbohydrate/fat foods, without deliberately chasing protein.
+      // ---------------------------------------------------------
+      for (let iteration = 0; iteration < 500; iteration++) {
+        const totals = getDailyTotals();
+        const difference = dailyCalories - totals.calories;
 
-const getProteinMax = (food: any) => {
-  if (food.name === "Eggs") return 6;
-  if (food.name === "Greek Yogurt") return 500;
-  if (food.name === "Chicken") return 400;
-  if (food.name === "Fish") return 400;
-  if (food.name === "Soy Chunks") return 150;
-  if (food.name === "Tofu") return 400;
-  if (food.name === "Paneer") return 300;
-  return 400;
-};
+        if (Math.abs(difference) <= 25) break;
 
-for (let iteration = 0; iteration < 100; iteration++) {
-  const currentProtein = getDailyProtein();
+        let bestMeal = -1;
+        let bestFood = -1;
+        let bestDelta = 0;
+        let replacement: any = null;
 
-  if (currentProtein >= dailyProtein) {
-    break;
-  }
+        meals.forEach((meal: any, mealIndex: number) => {
+          meal.foods.forEach((food: any, foodIndex: number) => {
+            if (!calorieFlexibleFoods.includes(food.name)) return;
 
-  let bestMealIndex = -1;
-  let bestFoodIndex = -1;
-  let bestProteinGain = 0;
-  let bestFood: any = null;
+            const step = getFoodStep(food.name);
+            const currentQuantity = Number(food.quantity) || 0;
+            const nextQuantity = difference > 0
+              ? currentQuantity + step
+              : currentQuantity - step;
 
-  meals.forEach(
-    (meal: any, mealIndex: number) => {
-      meal.foods.forEach(
-        (food: any, foodIndex: number) => {
-          if (
-            !proteinPriority.includes(food.name)
-          ) {
-            return;
+            if (nextQuantity > getFoodMax(food.name)) return;
+            if (nextQuantity < getFoodMin(food.name)) return;
+
+            const next = calculateFood(food.name, nextQuantity, food.unit);
+            const delta = next.calories - food.calories;
+
+            if (difference > 0) {
+              if (delta > 0 && (bestDelta === 0 || delta < bestDelta || Math.abs(difference - delta) < Math.abs(difference - bestDelta))) {
+                bestDelta = delta;
+                bestMeal = mealIndex;
+                bestFood = foodIndex;
+                replacement = next;
+              }
+            } else {
+              if (delta < 0 && (bestDelta === 0 || delta > bestDelta || Math.abs(difference - delta) < Math.abs(difference - bestDelta))) {
+                bestDelta = delta;
+                bestMeal = mealIndex;
+                bestFood = foodIndex;
+                replacement = next;
+              }
+            }
+          });
+        });
+
+        // If no existing flexible food can move, add a flexible food to a meal.
+        if (bestMeal < 0 || bestFood < 0 || !replacement) {
+          if (difference > 25 && meals.length > 0) {
+            const candidateNames = isVegan
+              ? ["Rice", "Oats", "Peanut Butter", "Sweet Potato"]
+              : ["Rice", "Oats", "Peanut Butter", "Sweet Potato"];
+
+            const candidate = candidateNames.find((name) => !avoidFood(name));
+            if (candidate) {
+              const unit = candidate === "Rice" ? "g cooked" : candidate === "Sweet Potato" ? "g" : "g";
+              const quantity = candidate === "Peanut Butter" ? 10 : candidate === "Oats" ? 20 : 50;
+              const targetMealIndex = meals.length > 1 ? 1 : 0;
+              meals[targetMealIndex].foods.push(calculateFood(candidate, quantity, unit));
+              meals[targetMealIndex] = recalculateMeal(meals[targetMealIndex]);
+              continue;
+            }
           }
-
-          const step = getProteinStep(food);
-
-          if (
-            food.quantity + step >
-            getProteinMax(food)
-          ) {
-            return;
-          }
-
-          const newFood = calculateFood(
-            food.name,
-            food.quantity + step,
-            food.unit
-          );
-
-          const proteinGain =
-            newFood.protein - food.protein;
-
-          if (proteinGain > bestProteinGain) {
-            bestProteinGain = proteinGain;
-            bestMealIndex = mealIndex;
-            bestFoodIndex = foodIndex;
-            bestFood = newFood;
-          }
+          break;
         }
-      );
-    }
-  );
 
-  if (
-    bestMealIndex === -1 ||
-    bestFoodIndex === -1 ||
-    !bestFood
-  ) {
-    break;
-  }
+        meals[bestMeal].foods[bestFood] = replacement;
+        meals[bestMeal] = recalculateMeal(meals[bestMeal]);
+      }
 
-  meals[bestMealIndex].foods[
-    bestFoodIndex
-  ] = bestFood;
-}
+      // ---------------------------------------------------------
+      // 3. Final small correction. Choose the closest calorie state
+      //    from a small set of flexible-food adjustments.
+      // ---------------------------------------------------------
+      let totals = getDailyTotals();
+      let correctionIterations = 0;
 
-/* Recalculate final meal totals */
+      while (Math.abs(dailyCalories - totals.calories) > 40 && correctionIterations < 40) {
+        correctionIterations++;
+        const direction = dailyCalories > totals.calories ? 1 : -1;
+        let bestChoice: any = null;
+        const beforeDistance = Math.abs(dailyCalories - totals.calories);
 
-meals = meals.map((meal: any) => {
-  const mealCalories = meal.foods.reduce(
-    (sum: number, food: any) =>
-      sum + food.calories,
-    0
-  );
+        meals.forEach((meal: any, mealIndex: number) => {
+          meal.foods.forEach((food: any, foodIndex: number) => {
+            if (!calorieFlexibleFoods.includes(food.name)) return;
+            const step = getFoodStep(food.name);
+            const nextQuantity = food.quantity + direction * step;
+            if (nextQuantity < getFoodMin(food.name) || nextQuantity > getFoodMax(food.name)) return;
 
-  const mealProtein = meal.foods.reduce(
-    (sum: number, food: any) =>
-      sum + food.protein,
-    0
-  );
+            const next = calculateFood(food.name, nextQuantity, food.unit);
+            const nextCalories = totals.calories - food.calories + next.calories;
+            const distance = Math.abs(dailyCalories - nextCalories);
 
-  const mealCarbs = meal.foods.reduce(
-    (sum: number, food: any) =>
-      sum + food.carbs,
-    0
-  );
+            if (distance < beforeDistance && (!bestChoice || distance < bestChoice.distance)) {
+              bestChoice = { mealIndex, foodIndex, next, distance };
+            }
+          });
+        });
 
-  const mealFat = meal.foods.reduce(
-    (sum: number, food: any) =>
-      sum + food.fat,
-    0
-  );
+        if (!bestChoice) break;
+        meals[bestChoice.mealIndex].foods[bestChoice.foodIndex] = bestChoice.next;
+        meals[bestChoice.mealIndex] = recalculateMeal(meals[bestChoice.mealIndex]);
+        totals = getDailyTotals();
+      }
 
-  return {
-    ...meal,
-    calories: Math.round(mealCalories),
-    protein: Number(
-      mealProtein.toFixed(1)
-    ),
-    carbs: Number(
-      mealCarbs.toFixed(1)
-    ),
-    fat: Number(
-      mealFat.toFixed(1)
-    ),
-  };
-});
+      meals = meals.map(recalculateMeal);
+      totals = getDailyTotals();
 
       return {
         day: dayNames[dayIndex],
         meals,
         target_calories: dailyCalories,
         target_protein: dailyProtein,
+        actual_calories: Math.round(totals.calories),
+        actual_protein: Number(totals.protein.toFixed(1)),
       };
-    }
-  );
+    });
 
-  return weeklyPlan;
-}
+    return weeklyPlan;
+  }
 
   // Temporary dummy plan
   const dummyPlan = {
@@ -3563,15 +3452,13 @@ nutrition: {
 
   if (error) {
     console.error(error);
-    showMessage("Failed to save AI Plan");
+    showMessage("Failed to save your AI Plan.", "AI Plan Error");
     return;
   }
 
   setAiPlan(data);
-  showMessage(
-    "Your personalized workout and nutrition plan has been successfully updated.",
-    "AI Plan Updated!"
-  );
+
+  showMessage("Your personalized workout and nutrition plan has been successfully updated.", "AI Plan Updated!");
 }
 
 async function loadAIPlan() {
@@ -3680,22 +3567,27 @@ const progressPercentage =
         >
           <div className="flex flex-col gap-4">
 
-            <div>
-              <p className="font-semibold text-white">
-                {exercise.name}
-              </p>
+            <div className="flex items-start gap-3">
+              <ExerciseThumbnail name={exercise.name} />
 
-              {exercise.rest === "—" ? (
-  <p className="text-sm text-surface-gray-400 mt-1">
-    {exercise.reps}
-  </p>
-) : (
-  <p className="text-sm text-surface-gray-400 mt-1">
-    {exercise.sets} Sets × {exercise.reps} Reps
-  </p>
-)}
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-white leading-tight">
+                  {exercise.name}
+                </p>
 
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                {exercise.rest === "—" ? (
+                  <p className="text-sm text-surface-gray-400 mt-1">
+                    {exercise.reps}
+                  </p>
+                ) : (
+                  <p className="text-sm text-surface-gray-400 mt-1">
+                    {exercise.sets} Sets × {exercise.reps} Reps
+                  </p>
+                )}
+              </div>
+            </div>
+
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
   <div className="min-w-0">
     <label className="text-xs text-surface-gray-400 whitespace-nowrap">
       Weight (kg)
@@ -3737,7 +3629,6 @@ const progressPercentage =
     />
   </div>
 </div>
-           </div>
 
             <div className="text-right">
               <p className="text-xs text-surface-gray-400">
@@ -3870,12 +3761,23 @@ const progressPercentage =
 
           <div className="flex flex-wrap gap-2">
   {meal.foods.map((food: any, foodIndex: number) => (
-    <span
-      key={foodIndex}
-      className="inline-flex items-center rounded-lg bg-surface-gray-800 border border-white/10 px-3 py-1.5 text-sm text-white"
-    >
-      {food.name} — {food.quantity} {food.unit}
+    <div
+  key={foodIndex}
+  className="inline-flex items-center gap-3 rounded-xl bg-surface-gray-800 border border-white/10 px-3 py-2 text-sm text-white"
+>
+  <img
+    src={getFoodImage(food.name)}
+    alt={food.name}
+    className="w-12 h-12 rounded-lg object-cover border border-white/10"
+  />
+
+  <div className="flex flex-col">
+    <span className="font-medium">{food.name}</span>
+    <span className="text-xs text-surface-gray-400">
+      {food.quantity} {food.unit}
     </span>
+  </div>
+</div>
   ))}
 </div>
 
@@ -4437,18 +4339,20 @@ const progressPercentage =
   </div>
 </div>
 
+        </div>
+      </div>
 
-
-      {/* BODYWISE CUSTOM POPUP */}
+      {/* BodyWise AI reusable confirmation / message popup */}
       {popup.open && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
           <div className="relative w-full max-w-md rounded-3xl border border-red-500/30 bg-gradient-to-br from-surface-gray-900 to-black p-8 text-center shadow-2xl shadow-red-500/10">
-
             <div className="absolute inset-0 rounded-3xl bg-red-500/5 pointer-events-none" />
 
             <div className="relative">
               <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/15 border border-red-500/30">
-                <span className="text-3xl">{popup.type === "confirm" ? "⚠️" : "🎉"}</span>
+                <span className="text-3xl">
+                  {popup.type === "confirm" ? "⚠️" : "🎉"}
+                </span>
               </div>
 
               <h2 className="text-2xl font-bold text-white mb-2">
@@ -4487,9 +4391,6 @@ const progressPercentage =
           </div>
         </div>
       )}
-
-        </div>
-      </div>
    </div>
-);
-}
+  );
+ }
