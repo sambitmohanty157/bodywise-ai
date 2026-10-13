@@ -54,13 +54,16 @@ type ExerciseVisualType =
 function getExerciseVisualType(name: string): ExerciseVisualType {
   const n = String(name || "").toLowerCase();
 
+  // Specific variations must be checked before their generic parent names.
   if (n.includes("incline dumbbell press") || n.includes("incline bench press") || n.includes("incline press")) return "inclinePress";
+  if (n.includes("reverse fly") || n.includes("rear delt")) return "facePull";
+  if (n.includes("fly")) return "chestFly";
   if (n.includes("bench press") || n.includes("floor press") || n.includes("chest press") || n.includes("resistance band chest press")) return "bench";
-  if (n.includes("fly") || n.includes("chest fly")) return "chestFly";
   if (n.includes("push-up") || n.includes("push up")) return "pushup";
 
+  if (n.includes("straight-arm pulldown") || n.includes("straight arm pulldown")) return "pulldown";
   if (n.includes("lat pulldown") || n.includes("pulldown") || n.includes("pull down")) return "pulldown";
-  if (n.includes("face pull") || n.includes("reverse fly")) return "facePull";
+  if (n.includes("face pull")) return "facePull";
   if (n.includes("row") || n.includes("pullover")) return "row";
 
   if (n.includes("deadlift") || n.includes("hip thrust") || n.includes("glute bridge") || n.includes("hamstring walkout")) return "deadlift";
@@ -71,20 +74,19 @@ function getExerciseVisualType(name: string): ExerciseVisualType {
   if (n.includes("lunge") || n.includes("bulgarian") || n.includes("split squat")) return "lunge";
   if (n.includes("calf")) return "calf";
 
-  if (n.includes("lateral raise") || n.includes("lateral raises")) return "lateralRaise";
+  if (n.includes("lateral raise")) return "lateralRaise";
   if (n.includes("shoulder press") || n.includes("pike push")) return "shoulderPress";
+  if (n.includes("hammer curl") || n.includes("hammer curls")) return "hammerCurl";
   if (n.includes("dumbbell curl") || n.includes("dumbbell curls")) return "dumbbellCurl";
-if (n.includes("hammer curl") || n.includes("hammer curls")) return "hammerCurl";
-if (n.includes("cable curl") || n.includes("cable curls")) return "cableCurl";
-if (n.includes("barbell curl") || n.includes("barbell curls")) return "barbellCurl";
-if (n.includes("curl")) return "curl";
-  if (n.includes("tricep pushdown") || n.includes("triceps pushdown") || n.includes("tricep extension") || n.includes("triceps extension") || n.includes("cable tricep")) return "tricepPushdown";
+  if (n.includes("cable curl") || n.includes("cable curls")) return "cableCurl";
+  if (n.includes("barbell curl") || n.includes("barbell curls")) return "barbellCurl";
+  if (n.includes("curl")) return "curl";
   if (n.includes("overhead") && n.includes("tricep")) return "tricepExtension";
+  if (n.includes("tricep pushdown") || n.includes("triceps pushdown") || n.includes("tricep extension") || n.includes("triceps extension") || n.includes("cable tricep")) return "tricepPushdown";
   if (n.includes("dip")) return "dip";
 
-  if (n.includes("plank") || n.includes("crunch") || n.includes("leg raise") || n.includes("ab")) return "core";
+  if (n.includes("plank") || n.includes("crunch") || n.includes("leg raise") || n.includes(" ab")) return "core";
   if (n.includes("walk") || n.includes("run") || n.includes("cycling") || n.includes("bike") || n.includes("cardio") || n.includes("hiit")) return "cardio";
-
   return "general";
 }
 
@@ -138,18 +140,24 @@ const getFoodImage = (foodName?: string) => {
 };
 
 function getExerciseImageSlug(name: string): string | null {
-  const n = String(name || "").toLowerCase();
+  const n = String(name || "").toLowerCase().trim().replace(/[–—]/g, "-");
 
+  // Match specific variants before generic exercise terms.
+  if (n.includes("close-grip") && n.includes("bench press")) return "close-grip-bench";
+  if ((n.includes("straight-arm") || n.includes("straight arm")) && n.includes("pulldown")) return "straight-arm-pulldown";
+  if (n.includes("cable lateral raise") || n.includes("cable lateral raises")) return "cable-lateral-raise";
+  if (n.includes("reverse fly") || n.includes("reverse flyes") || n.includes("rear delt")) return "rear-delt-fly";
   if (n.includes("incline") && (n.includes("press") || n.includes("bench"))) return "incline-press";
   if (n.includes("bench press") || n.includes("floor press") || n.includes("chest press") || n.includes("band chest press")) return "bench-press";
+  if (n.includes("cable") && n.includes("fly")) return "cable-chest-fly";
   if (n.includes("fly")) return "chest-fly";
 
   if (n.includes("lat pulldown") || n.includes("pulldown") || n.includes("pull down")) return "lat-pulldown";
-  if (n.includes("pull-up") || n.includes("pull up")) return "pull-ups";
+  if (n.includes("pull-up") || n.includes("pull up") || n.includes("pullups")) return "pull-ups";
   if (n.includes("face pull")) return "face-pull";
-  if (n.includes("reverse fly") || n.includes("rear delt")) return "rear-delt-fly";
   if (n.includes("t-bar row")) return "t-bar-row";
-  if (n.includes("seated cable row")) return "seated-cable-row";
+  if (n.includes("seated cable row") || n.includes("seated row")) return "seated-cable-row";
+  if (n.includes("barbell row") || n.includes("bent-over row") || n.includes("bent over row")) return "barbell-row";
   if (n.includes("row") || n.includes("pullover")) return "barbell-row";
 
   if (n.includes("leg press")) return "leg-press";
@@ -160,9 +168,11 @@ function getExerciseImageSlug(name: string): string | null {
   if (n.includes("calf")) return "calf-raise";
   if (n.includes("bulgarian") || n.includes("split squat")) return "bulgarian-split-squat";
   if (n.includes("lunge")) return "walking-lunge";
-  if (n.includes("romanian deadlift") || n.includes("deadlift")) return "romanian-deadlift";
+  if (n.includes("romanian deadlift")) return "romanian-deadlift";
+  if (n.includes("deadlift")) return "deadlift";
   if (n.includes("hip thrust") || n.includes("glute bridge")) return "hip-thrust";
   if (n.includes("good morning")) return "good-morning";
+  if (n.includes("hack squat")) return "hack-squat";
   if (n.includes("squat") || n.includes("goblet")) return "squat";
 
   if (n.includes("lateral raise")) return "lateral-raise";
@@ -171,14 +181,17 @@ function getExerciseImageSlug(name: string): string | null {
   if (n.includes("shrug")) return "shrugs";
   if (n.includes("shoulder press") || n.includes("pike push")) return "shoulder-press";
 
+  if (n.includes("wrist curl")) return "wrist-curl";
   if (n.includes("preacher curl")) return "preacher-curl";
   if (n.includes("hammer curl")) return "hammer-curl";
+  if (n.includes("cable curl")) return "cable-curl";
+  if (n.includes("dumbbell curl")) return "dumbbell-curl";
+  if (n.includes("barbell curl")) return "barbell-curl";
   if (n.includes("curl")) return "barbell-curl";
   if (n.includes("tricep pushdown") || n.includes("triceps pushdown")) return "tricep-pushdown";
   if (n.includes("overhead") && n.includes("tricep")) return "overhead-tricep-extension";
-  if (n.includes("tricep extension") || n.includes("cable tricep")) return "tricep-pushdown";
+  if (n.includes("tricep extension") || n.includes("triceps extension") || n.includes("cable tricep")) return "overhead-tricep-extension";
   if (n.includes("dip")) return "dips";
-
   return null;
 }
 
@@ -186,30 +199,22 @@ function ExerciseThumbnail({ name }: { name: string }) {
   const imageSlug = getExerciseImageSlug(name);
   const type = getExerciseVisualType(name);
 
-  if (type === "dumbbellCurl") {
-  return (
-    <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl border border-red-500/20 bg-black overflow-hidden shadow-inner shadow-red-500/10">
-      <img
-        src="/exercises/dumbbell-curl.jpg"
-        alt="Dumbbell Curl"
-        className="w-full h-full object-cover"
-      />
-    </div>
-  );
-}
-
   if (imageSlug) {
     return (
-      <div className="w-28 h-20 sm:w-32 sm:h-24 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#111] shadow-inner">
+      <div className="w-28 h-24 sm:w-32 sm:h-28 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#111] shadow-inner flex items-center justify-center p-1">
         <img
           src={`/exercises/${imageSlug}.jpg`}
           alt={`${name} exercise demonstration`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain object-center"
           loading="lazy"
           onError={(event) => {
-            event.currentTarget.style.display = "none";
+            const image = event.currentTarget;
+            image.style.display = "none";
+            const fallback = image.parentElement?.querySelector("[data-exercise-image-fallback]");
+            if (fallback) fallback.classList.remove("hidden");
           }}
         />
+        <span data-exercise-image-fallback className="hidden text-center text-xs text-gray-400 px-2">Exercise preview unavailable</span>
       </div>
     );
   }
