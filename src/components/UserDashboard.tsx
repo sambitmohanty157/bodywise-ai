@@ -201,11 +201,11 @@ function ExerciseThumbnail({ name }: { name: string }) {
 
   if (imageSlug) {
     return (
-      <div className="w-28 h-24 sm:w-32 sm:h-28 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#111] shadow-inner flex items-center justify-center p-1">
+      <div className="relative w-full aspect-[16/9] min-h-[150px] sm:min-h-[210px] shrink-0 overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-[#1a0909] via-[#101010] to-black shadow-inner shadow-red-500/10 flex items-center justify-center p-2 sm:p-3">
         <img
           src={`/exercises/${imageSlug}.jpg`}
           alt={`${name} exercise demonstration`}
-          className="w-full h-full object-contain object-center"
+          className="block w-full h-full object-contain object-center"
           loading="lazy"
           onError={(event) => {
             const image = event.currentTarget;
@@ -323,7 +323,7 @@ function ExerciseThumbnail({ name }: { name: string }) {
   }
 
   return (
-    <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl border border-red-500/20 bg-gradient-to-br from-red-950/70 via-zinc-900 to-black flex items-center justify-center overflow-hidden shadow-inner shadow-red-500/10">
+    <div className="relative w-full aspect-[16/9] min-h-[180px] sm:min-h-[220px] shrink-0 rounded-xl border border-red-500/20 bg-gradient-to-br from-red-950/70 via-zinc-900 to-black flex items-center justify-center overflow-hidden shadow-inner shadow-red-500/10">
       <svg viewBox="0 0 104 92" className="w-full h-full" aria-label={`${name} exercise illustration`} role="img">
         <defs>
           <radialGradient id="exerciseGlow" cx="50%" cy="50%" r="70%">
@@ -3568,11 +3568,11 @@ const progressPercentage =
       (exercise: any, index: number) => (
         <div
           key={index}
-          className="bg-surface-black border border-white/5 rounded-xl p-4"
+          className="group bg-gradient-to-b from-[#171717] to-[#090909] border border-white/10 hover:border-red-500/40 rounded-2xl p-3 sm:p-4 shadow-lg shadow-black/20 transition-colors duration-200"
         >
           <div className="flex flex-col gap-4">
 
-            <div className="flex items-start gap-3">
+            <div className="flex flex-col gap-3">
               <ExerciseThumbnail name={exercise.name} />
 
               <div className="min-w-0 flex-1">
@@ -3581,12 +3581,12 @@ const progressPercentage =
                 </p>
 
                 {exercise.rest === "—" ? (
-                  <p className="text-sm text-surface-gray-400 mt-1">
+                  <p className="inline-flex mt-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm font-medium text-gray-200">
                     {exercise.reps}
                   </p>
                 ) : (
-                  <p className="text-sm text-surface-gray-400 mt-1">
-                    {exercise.sets} Sets × {exercise.reps} Reps
+                  <p className="inline-flex mt-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-medium text-gray-300">
+                    {exercise.sets} Sets <span className="mx-2 text-red-400">×</span> {exercise.reps} Reps
                   </p>
                 )}
               </div>
@@ -3610,7 +3610,7 @@ const progressPercentage =
           [exercise.name]: e.target.value,
         }))
       }
-      className="mt-1 w-full min-w-0 bg-surface-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white"
+      className="mt-1 w-full min-w-0 bg-[#111] border border-white/10 focus:border-red-500/60 rounded-lg px-3 py-2 text-white outline-none transition-colors"
     />
   </div>
 
@@ -3630,13 +3630,13 @@ const progressPercentage =
           [exercise.name]: e.target.value,
         }))
       }
-      className="mt-1 w-full min-w-0 bg-surface-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white"
+      className="mt-1 w-full min-w-0 bg-[#111] border border-white/10 focus:border-red-500/60 rounded-lg px-3 py-2 text-white outline-none transition-colors"
     />
   </div>
 </div>
 
             <div className="text-right">
-              <p className="text-xs text-surface-gray-400">
+              <p className="text-xs uppercase tracking-wider text-surface-gray-500">
                 Rest
               </p>
 
@@ -4399,3 +4399,4 @@ const progressPercentage =
    </div>
   );
  }
+ 
