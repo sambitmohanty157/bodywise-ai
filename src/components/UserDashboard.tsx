@@ -341,6 +341,7 @@ function ExerciseThumbnail({ name }: { name: string }) {
 export default function UserDashboard({ user }: UserDashboardProps) {
   const [profile, setProfile] = useState<any>(null);
   const [isPro, setIsPro] = useState(false);
+  const [isTrialActive, setIsTrialActive] = useState(false);
   const [workoutStreak, setWorkoutStreak] = useState(0);
   const [workoutHistory, setWorkoutHistory] = useState<any[]>([]);
   const [weightInput, setWeightInput] = useState('');
@@ -527,22 +528,74 @@ if (subscriptionError) {
   );
 }
 
-// Check 7-day free trial
-const { data: trialProfile, error: trialError } =
-  await supabase
-    .from("user_profiles")
-    .select("trial_start_date, trial_end_date")
-    .eq("id", user.id)
-    .maybeSingle();
+// Start a one-time 7-day trial when the user's dashboard is first loaded.
+// Existing trial dates are never overwritten, so an expired trial cannot restart.
+let { data: trialProfile, error: trialError } = await supabase
+  .from("user_profiles")
+  .select("trial_start_date, trial_end_date")
+  .eq("id", user.id)
+  .maybeSingle();
 
 if (trialError) {
   console.error("Trial check error:", trialError);
 }
 
-const trialActive =
-  !!trialProfile?.trial_end_date &&
-  new Date(trialProfile.trial_end_date) > new Date();
+if (
+  !trialError &&
+  trialProfile &&
+  !trialProfile.trial_start_date &&
+  !trialProfile.trial_end_date
+) {
+  const trialStart = new Date();
+  const trialEnd = new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000);
 
+  const { data: startedTrial, error: startTrialError } = await supabase
+    .from("user_profiles")
+    .update({
+      trial_start_date: trialStart.toISOString(),
+      trial_end_date: trialEnd.toISOString(),
+    })
+    .eq("id", user.id)
+    .is("trial_start_date", null)
+    .is("trial_end_date", null)
+    .select("trial_start_date, trial_end_date")
+    .maybeSingle();
+
+  if (startTrialError) {
+    console.error("Unable to start free trial:", startTrialError);
+  } else if (startedTrial) {
+    trialProfile = startedTrial;
+  } else {
+    // Another request may have started the trial at the same time; re-read it.
+    const { data: refreshedTrial, error: refreshTrialError } = await supabase
+      .from("user_profiles")
+      .select("trial_start_date, trial_end_date")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (refreshTrialError) {
+      console.error("Unable to refresh trial status:", refreshTrialError);
+    } else {
+      trialProfile = refreshedTrial;
+    }
+  }
+}
+
+const now = Date.now();
+const trialStartTime = trialProfile?.trial_start_date
+  ? new Date(trialProfile.trial_start_date).getTime()
+  : Number.NaN;
+const trialEndTime = trialProfile?.trial_end_date
+  ? new Date(trialProfile.trial_end_date).getTime()
+  : Number.NaN;
+
+const trialActive =
+  Number.isFinite(trialStartTime) &&
+  Number.isFinite(trialEndTime) &&
+  trialStartTime <= now &&
+  trialEndTime > now;
+
+setIsTrialActive(!subscription && trialActive);
 setIsPro(!!subscription || trialActive);
 
 
@@ -2624,846 +2677,87 @@ function generateWorkoutPlan(profile: any) {
 }
 
 async function handleGenerateAIPlan() {
-  if (!user) return;
-
-  if (!isPro) {
-    showMessage("🔥 BodyWise Pro is required to create or update your AI plan.");
+  if (!user) {
+    showMessage("Please sign in to generate your AI plan.", "Authentication Required");
     return;
   }
+
+  // Keep the existing BodyWise Pro / 7-day trial access gate.
+  if (!isPro) {
+    showMessage(
+      "An active BodyWise Pro subscription or free trial is required to create or update your AI plan.",
+      "BodyWise Pro Required"
+    );
+    return;
+  }
+
+  if (generatingPlan) return;
 
   setGeneratingPlan(true);
 
-  const userContext = {
-  age: profile?.age,
-  gender: profile?.gender,
-
-  currentWeight: profile?.current_weight_kg,
-  goalWeight: profile?.goal_weight_kg,
-  height: profile?.height_cm,
-
-  fitnessGoal: profile?.fitness_goal,
-  activityLevel: profile?.activity_level,
-  energyLevel: profile?.energy_level,
-
-  workoutDays: profile?.workout_days,
-  workoutDuration: profile?.workout_duration,
-  workoutLocation: profile?.workout_location,
-  experienceLevel: profile?.experience_level,
-
-  injuries: profile?.injuries,
-
-  dietPreference: profile?.diet_preference,
-  mealsPerDay: profile?.meals_per_day,
-
-  sleepHours: profile?.sleep_duration,
-  sleepQuality: profile?.sleep_quality,
-  stressLevel: profile?.routine_stress,
-
-  waterIntake: profile?.water_intake,
-};
-
-console.log("AI USER CONTEXT:", userContext);
-
-const personalizedWeeklyPlan = generateWorkoutPlan(profile);
-
-console.log("PERSONALIZED WEEKLY PLAN:", personalizedWeeklyPlan);
-
-const FOOD_DATABASE = {
-  "Oats": {
-    calories: 389,
-    protein: 16.9,
-    carbs: 66.3,
-    fat: 6.9,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Rice": {
-    calories: 130,
-    protein: 2.7,
-    carbs: 28,
-    fat: 0.3,
-    unit: "100g cooked",
-    diet: "vegan",
-  },
-
-  "Chicken": {
-    calories: 165,
-    protein: 31,
-    carbs: 0,
-    fat: 3.6,
-    unit: "100g",
-    diet: "non_veg",
-  },
-
-  "Fish": {
-    calories: 128,
-    protein: 26,
-    carbs: 0,
-    fat: 2.7,
-    unit: "100g",
-    diet: "non_veg",
-  },
-
-  "Eggs": {
-    calories: 72,
-    protein: 6.3,
-    carbs: 0.4,
-    fat: 4.8,
-    unit: "1 egg",
-    diet: "non_veg",
-  },
-
-  "Paneer": {
-    calories: 265,
-    protein: 18.3,
-    carbs: 1.2,
-    fat: 20.8,
-    unit: "100g",
-    diet: "vegetarian",
-  },
-
-  "Tofu": {
-    calories: 76,
-    protein: 8,
-    carbs: 1.9,
-    fat: 4.8,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Dal": {
-    calories: 116,
-    protein: 9,
-    carbs: 20,
-    fat: 0.4,
-    unit: "100g cooked",
-    diet: "vegan",
-  },
-
-  "Soy Chunks": {
-    calories: 345,
-    protein: 52,
-    carbs: 33,
-    fat: 0.5,
-    unit: "100g dry",
-    diet: "vegan",
-  },
-
-  "Milk": {
-    calories: 61,
-    protein: 3.2,
-    carbs: 4.8,
-    fat: 3.3,
-    unit: "100ml",
-    diet: "vegetarian",
-  },
-
-  "Greek Yogurt": {
-    calories: 59,
-    protein: 10,
-    carbs: 3.6,
-    fat: 0.4,
-    unit: "100g",
-    diet: "vegetarian",
-  },
-
-  "Curd": {
-    calories: 61,
-    protein: 3.5,
-    carbs: 4.7,
-    fat: 3.3,
-    unit: "100g",
-    diet: "vegetarian",
-  },
-
-  "Chickpeas": {
-    calories: 164,
-    protein: 8.9,
-    carbs: 27.4,
-    fat: 2.6,
-    unit: "100g cooked",
-    diet: "vegan",
-  },
-
-  "Rajma": {
-    calories: 127,
-    protein: 8.7,
-    carbs: 22.8,
-    fat: 0.5,
-    unit: "100g cooked",
-    diet: "vegan",
-  },
-
-  "Banana": {
-    calories: 105,
-    protein: 1.3,
-    carbs: 27,
-    fat: 0.4,
-    unit: "1 medium",
-    diet: "vegan",
-  },
-
-  "Apple": {
-    calories: 95,
-    protein: 0.5,
-    carbs: 25,
-    fat: 0.3,
-    unit: "1 medium",
-    diet: "vegan",
-  },
-
-  "Peanut Butter": {
-    calories: 588,
-    protein: 25,
-    carbs: 20,
-    fat: 50,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Almonds": {
-    calories: 579,
-    protein: 21.2,
-    carbs: 21.6,
-    fat: 49.9,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Sweet Potato": {
-    calories: 86,
-    protein: 1.6,
-    carbs: 20.1,
-    fat: 0.1,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Potato": {
-    calories: 87,
-    protein: 1.9,
-    carbs: 20.1,
-    fat: 0.1,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Spinach": {
-    calories: 23,
-    protein: 2.9,
-    carbs: 3.6,
-    fat: 0.4,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Vegetables": {
-    calories: 50,
-    protein: 2,
-    carbs: 10,
-    fat: 0.5,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Salad": {
-    calories: 25,
-    protein: 1,
-    carbs: 5,
-    fat: 0.2,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Soy Milk": {
-    calories: 33,
-    protein: 3.3,
-    carbs: 0.7,
-    fat: 1.8,
-    unit: "100ml",
-    diet: "vegan",
-  },
-
-  "Soy Yogurt": {
-    calories: 55,
-    protein: 4,
-    carbs: 3,
-    fat: 2.5,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Berries": {
-    calories: 50,
-    protein: 0.7,
-    carbs: 12,
-    fat: 0.3,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Nuts": {
-    calories: 607,
-    protein: 20,
-    carbs: 22,
-    fat: 54,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Fruit": {
-    calories: 60,
-    protein: 0.8,
-    carbs: 15,
-    fat: 0.3,
-    unit: "100g",
-    diet: "vegan",
-  },
-
-  "Lentils": {
-    calories: 116,
-    protein: 9,
-    carbs: 20,
-    fat: 0.4,
-    unit: "100g cooked",
-    diet: "vegan",
-  },
-};
-
- // Simulate AI processing
-  await new Promise((resolve) => setTimeout(resolve, 3000));
-
-  function generateNutritionMeals(
-    profile: any,
-    calories: number | string,
-    proteinTarget: number | string
-  ) {
-    const dailyCalories = Number(calories) || 0;
-    const dailyProtein = Number(proteinTarget) || 0;
-
-    const diet = String(profile?.diet_preference || "")
-      .toLowerCase()
-      .trim()
-      .replace(/[\s-]+/g, "_");
-
-    const requestedMeals = Math.max(
-      3,
-      Math.min(5, Number(profile?.meals_per_day) || 3)
+  try {
+    // The Edge Function reads the authenticated user's profile securely,
+    // verifies subscription/trial eligibility, calls Gemini, and saves ai_plans.
+    const { data: response, error: functionError } = await supabase.functions.invoke(
+      "generate-ai-plan",
+      { body: {} }
     );
 
-    const allergies = String(profile?.food_allergies || "").toLowerCase();
-    const restrictions = String(profile?.food_restrictions || "").toLowerCase();
+    if (functionError) {
+      let errorMessage = functionError.message || "Gemini AI could not generate your plan.";
 
-    const isVegan = diet === "vegan";
-    const isVegetarian = diet === "vegetarian" || diet === "veg";
-
-    const allergyList = allergies
-      .split(",")
-      .map((item: string) => item.trim())
-      .filter(Boolean);
-    const restrictionList = restrictions
-      .split(",")
-      .map((item: string) => item.trim())
-      .filter(Boolean);
-
-    const avoidFood = (food: string) => {
-      const text = String(food).toLowerCase();
-      return [...allergyList, ...restrictionList].some(
-        (item) => item && text.includes(item)
-      );
-    };
-
-    const calculateFood = (
-      name: string,
-      quantity: number,
-      unit: string
-    ) => {
-      const food = FOOD_DATABASE[name as keyof typeof FOOD_DATABASE];
-
-      if (!food) {
-        return {
-          name,
-          quantity,
-          unit,
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-        };
-      }
-
-      const isSingleServing =
-        food.unit === "1 egg" || food.unit === "1 medium";
-
-      const multiplier = isSingleServing ? quantity : quantity / 100;
-
-      return {
-        name,
-        quantity,
-        unit,
-        calories: Math.round(food.calories * multiplier),
-        protein: Number((food.protein * multiplier).toFixed(1)),
-        carbs: Number((food.carbs * multiplier).toFixed(1)),
-        fat: Number((food.fat * multiplier).toFixed(1)),
-      };
-    };
-
-    const vegetarianMeals = [
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Milk", 250, "ml"], ["Banana", 1, "medium"]] },
-        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Paneer", 150, "g"], ["Dal", 150, "g cooked"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Apple", 1, "medium"], ["Almonds", 20, "g"]] },
-        { name: "Dinner", foods: [["Paneer", 120, "g"], ["Rice", 150, "g cooked"], ["Vegetables", 200, "g"], ["Curd", 150, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]] },
-        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Chickpeas", 180, "g cooked"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Curd", 200, "g"], ["Apple", 1, "medium"], ["Almonds", 20, "g"]] },
-        { name: "Dinner", foods: [["Paneer", 150, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Milk", 250, "ml"], ["Apple", 1, "medium"], ["Almonds", 15, "g"]] },
-        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Rajma", 180, "g cooked"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]] },
-        { name: "Dinner", foods: [["Paneer", 150, "g"], ["Dal", 150, "g cooked"], ["Salad", 150, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Soy Milk", 250, "ml"], ["Berries", 100, "g"]] },
-        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Tofu", 180, "g"], ["Dal", 150, "g cooked"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Apple", 1, "medium"]] },
-        { name: "Dinner", foods: [["Paneer", 120, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Milk", 250, "ml"], ["Banana", 1, "medium"], ["Peanut Butter", 15, "g"]] },
-        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Dal", 200, "g cooked"], ["Paneer", 120, "g"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Curd", 200, "g"], ["Apple", 1, "medium"], ["Almonds", 15, "g"]] },
-        { name: "Dinner", foods: [["Tofu", 200, "g"], ["Rice", 150, "g cooked"], ["Vegetables", 200, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Greek Yogurt", 200, "g"], ["Berries", 100, "g"], ["Almonds", 15, "g"]] },
-        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Rajma", 180, "g cooked"], ["Paneer", 100, "g"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Milk", 250, "ml"], ["Banana", 1, "medium"]] },
-        { name: "Dinner", foods: [["Paneer", 150, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Milk", 250, "ml"], ["Apple", 1, "medium"]] },
-        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Chickpeas", 180, "g cooked"], ["Paneer", 120, "g"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"], ["Almonds", 15, "g"]] },
-        { name: "Dinner", foods: [["Tofu", 180, "g"], ["Rice", 150, "g cooked"], ["Vegetables", 200, "g"]] },
-      ],
-    ];
-
-    const nonVegetarianMeals = [
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Eggs", 3, "eggs"], ["Banana", 1, "medium"]] },
-        { name: "Lunch", foods: [["Chicken", 150, "g"], ["Rice", 180, "g cooked"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Apple", 1, "medium"], ["Almonds", 20, "g"]] },
-        { name: "Dinner", foods: [["Fish", 150, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Eggs", 3, "eggs"], ["Apple", 1, "medium"]] },
-        { name: "Lunch", foods: [["Chicken", 150, "g"], ["Rice", 180, "g cooked"], ["Dal", 150, "g cooked"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]] },
-        { name: "Dinner", foods: [["Fish", 160, "g"], ["Rice", 150, "g cooked"], ["Salad", 150, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Milk", 250, "ml"], ["Eggs", 2, "eggs"], ["Banana", 1, "medium"]] },
-        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Chicken", 150, "g"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Almonds", 20, "g"]] },
-        { name: "Dinner", foods: [["Paneer", 120, "g"], ["Fish", 120, "g"], ["Salad", 150, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]] },
-        { name: "Lunch", foods: [["Chicken", 170, "g"], ["Rice", 180, "g cooked"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Milk", 250, "ml"], ["Apple", 1, "medium"], ["Almonds", 15, "g"]] },
-        { name: "Dinner", foods: [["Fish", 150, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Eggs", 3, "eggs"], ["Apple", 1, "medium"], ["Milk", 200, "ml"]] },
-        { name: "Lunch", foods: [["Chicken", 150, "g"], ["Rice", 180, "g cooked"], ["Dal", 150, "g cooked"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]] },
-        { name: "Dinner", foods: [["Paneer", 100, "g"], ["Fish", 150, "g"], ["Salad", 150, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Eggs", 2, "eggs"], ["Greek Yogurt", 150, "g"], ["Banana", 1, "medium"]] },
-        { name: "Lunch", foods: [["Rice", 180, "g cooked"], ["Chicken", 170, "g"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Milk", 250, "ml"], ["Apple", 1, "medium"], ["Almonds", 15, "g"]] },
-        { name: "Dinner", foods: [["Fish", 160, "g"], ["Rice", 150, "g cooked"], ["Salad", 150, "g"]] },
-      ],
-      [
-        { name: "Breakfast", foods: [["Oats", 60, "g"], ["Eggs", 3, "eggs"], ["Banana", 1, "medium"]] },
-        { name: "Lunch", foods: [["Chicken", 150, "g"], ["Rice", 180, "g cooked"], ["Chickpeas", 120, "g cooked"], ["Vegetables", 150, "g"]] },
-        { name: "Snack", foods: [["Greek Yogurt", 200, "g"], ["Apple", 1, "medium"], ["Almonds", 15, "g"]] },
-        { name: "Dinner", foods: [["Fish", 150, "g"], ["Sweet Potato", 200, "g"], ["Salad", 150, "g"]] },
-      ],
-    ];
-
-    const veganAllowed = new Set([
-      "Oats", "Soy Milk", "Banana", "Rice", "Tofu", "Dal",
-      "Vegetables", "Soy Yogurt", "Apple", "Almonds", "Soy Chunks",
-      "Sweet Potato", "Salad", "Chickpeas", "Rajma", "Berries",
-      "Nuts", "Peanut Butter", "Lentils", "Potato", "Spinach", "Fruit",
-    ]);
-
-    const weeklyTemplates = isVegan
-      ? vegetarianMeals.map((day) =>
-          day.map((meal) => ({
-            ...meal,
-            foods: meal.foods.filter((food: any[]) => veganAllowed.has(food[0])),
-          }))
-        )
-      : isVegetarian
-      ? vegetarianMeals
-      : nonVegetarianMeals.map((day, dayIndex) => {
-          if (dayIndex % 2 === 1) {
-            return day.map((meal, mealIndex) => ({
-              ...meal,
-              foods:
-                mealIndex === 0 || mealIndex === 2
-                  ? vegetarianMeals[dayIndex][mealIndex].foods
-                  : meal.foods,
-            }));
-          }
-          return day;
-        });
-
-    const dayNames = [
-      "Monday", "Tuesday", "Wednesday", "Thursday",
-      "Friday", "Saturday", "Sunday",
-    ];
-
-    const proteinPriority = [
-      "Chicken", "Fish", "Eggs", "Greek Yogurt", "Soy Chunks",
-      "Tofu", "Paneer", "Dal", "Lentils", "Chickpeas", "Rajma",
-    ];
-
-    const calorieFlexibleFoods = [
-      "Rice", "Oats", "Sweet Potato", "Potato", "Banana",
-      "Peanut Butter", "Almonds", "Nuts", "Fruit", "Berries",
-      "Vegetables", "Salad",
-    ];
-
-    const getFoodStep = (name: string) => {
-      if (name === "Banana" || name === "Apple") return 1;
-      if (name === "Eggs") return 1;
-      if (name === "Peanut Butter" || name === "Almonds" || name === "Nuts") return 5;
-      if (name === "Oats") return 10;
-      if (name === "Rice" || name === "Sweet Potato" || name === "Potato") return 25;
-      if (name === "Vegetables" || name === "Salad" || name === "Berries" || name === "Fruit") return 25;
-      return 25;
-    };
-
-    const getFoodMax = (name: string) => {
-      if (name === "Banana") return 3;
-      if (name === "Apple") return 2;
-      if (name === "Eggs") return 6;
-      if (name === "Peanut Butter") return 60;
-      if (name === "Almonds" || name === "Nuts") return 60;
-      if (name === "Oats") return 120;
-      if (name === "Rice") return 450;
-      if (name === "Sweet Potato" || name === "Potato") return 450;
-      if (name === "Vegetables" || name === "Salad") return 400;
-      if (name === "Berries" || name === "Fruit") return 250;
-      return 400;
-    };
-
-    const getFoodMin = (name: string) => {
-      if (name === "Banana" || name === "Apple" || name === "Eggs") return 0;
-      if (name === "Peanut Butter" || name === "Almonds" || name === "Nuts") return 0;
-      return 0;
-    };
-
-    const recalculateMeal = (meal: any) => {
-      const foods = meal.foods
-        .map((food: any) => {
-          // Meal templates use tuple format: [name, quantity, unit].
-          // Normalize tuples and object-shaped foods into one safe format.
-          if (Array.isArray(food)) {
-            return calculateFood(
-              String(food[0] || ""),
-              Number(food[1]) || 0,
-              String(food[2] || "g")
-            );
-          }
-
-          return calculateFood(
-            String(food?.name || ""),
-            Number(food?.quantity) || 0,
-            String(food?.unit || "g")
-          );
-        })
-        .filter((food: any) => food.name);
-      return {
-        ...meal,
-        foods,
-        calories: Math.round(foods.reduce((sum: number, food: any) => sum + food.calories, 0)),
-        protein: Number(foods.reduce((sum: number, food: any) => sum + food.protein, 0).toFixed(1)),
-        carbs: Number(foods.reduce((sum: number, food: any) => sum + food.carbs, 0).toFixed(1)),
-        fat: Number(foods.reduce((sum: number, food: any) => sum + food.fat, 0).toFixed(1)),
-      };
-    };
-
-    const weeklyPlan = weeklyTemplates.map((dayTemplate, dayIndex) => {
-      let selectedMeals = dayTemplate
-        .map((meal: any) => ({
-          ...meal,
-          // Keep the original tuple data here; recalculateMeal() below
-          // converts every food into the dashboard's object format.
-          foods: meal.foods.filter((food: any) => {
-            const foodName = Array.isArray(food)
-              ? food[0]
-              : food?.name;
-            return foodName && !avoidFood(String(foodName));
-          }),
-        }))
-        .slice(0, Math.min(4, requestedMeals));
-
-      // Add a dedicated pre/post workout meal only when the user selected 5 meals.
-      if (requestedMeals === 5) {
-        selectedMeals.splice(3, 0, {
-          name: "Pre/Post Workout",
-          foods: isVegan
-            ? [["Soy Milk", 250, "ml"], ["Banana", 1, "medium"]]
-            : [["Greek Yogurt", 200, "g"], ["Banana", 1, "medium"]],
-        });
-      }
-
-      // If allergy/restriction filtering removed all foods from a meal,
-      // keep the meal but let the balancing logic work with the remaining foods.
-      let meals = selectedMeals.map(recalculateMeal);
-
-      const getDailyTotals = () =>
-        meals.reduce(
-          (totals: any, meal: any) => ({
-            calories: totals.calories + meal.calories,
-            protein: totals.protein + meal.protein,
-            carbs: totals.carbs + meal.carbs,
-            fat: totals.fat + meal.fat,
-          }),
-          { calories: 0, protein: 0, carbs: 0, fat: 0 }
-        );
-
-      // ---------------------------------------------------------
-      // 1. Protein target: add protein-rich foods/quantities first.
-      // ---------------------------------------------------------
-      for (let iteration = 0; iteration < 150; iteration++) {
-        const totals = getDailyTotals();
-        if (totals.protein >= dailyProtein - 1) break;
-
-        let bestMeal = -1;
-        let bestFood = -1;
-        let bestGain = 0;
-        let replacement: any = null;
-
-        meals.forEach((meal: any, mealIndex: number) => {
-          meal.foods.forEach((food: any, foodIndex: number) => {
-            if (!proteinPriority.includes(food.name)) return;
-
-            const step = food.name === "Eggs" ? 1 : food.name === "Greek Yogurt" ? 50 : 25;
-            if (food.quantity + step > getFoodMax(food.name)) return;
-
-            const next = calculateFood(food.name, food.quantity + step, food.unit);
-            const gain = next.protein - food.protein;
-
-            if (gain > bestGain) {
-              bestGain = gain;
-              bestMeal = mealIndex;
-              bestFood = foodIndex;
-              replacement = next;
-            }
-          });
-        });
-
-        if (bestMeal < 0 || bestFood < 0 || !replacement) break;
-        meals[bestMeal].foods[bestFood] = replacement;
-        meals[bestMeal] = recalculateMeal(meals[bestMeal]);
-      }
-
-      // ---------------------------------------------------------
-      // 2. Calorie target: raise/lower calories primarily through
-      //    carbohydrate/fat foods, without deliberately chasing protein.
-      // ---------------------------------------------------------
-      for (let iteration = 0; iteration < 500; iteration++) {
-        const totals = getDailyTotals();
-        const difference = dailyCalories - totals.calories;
-
-        if (Math.abs(difference) <= 25) break;
-
-        let bestMeal = -1;
-        let bestFood = -1;
-        let bestDelta = 0;
-        let replacement: any = null;
-
-        meals.forEach((meal: any, mealIndex: number) => {
-          meal.foods.forEach((food: any, foodIndex: number) => {
-            if (!calorieFlexibleFoods.includes(food.name)) return;
-
-            const step = getFoodStep(food.name);
-            const currentQuantity = Number(food.quantity) || 0;
-            const nextQuantity = difference > 0
-              ? currentQuantity + step
-              : currentQuantity - step;
-
-            if (nextQuantity > getFoodMax(food.name)) return;
-            if (nextQuantity < getFoodMin(food.name)) return;
-
-            const next = calculateFood(food.name, nextQuantity, food.unit);
-            const delta = next.calories - food.calories;
-
-            if (difference > 0) {
-              if (delta > 0 && (bestDelta === 0 || delta < bestDelta || Math.abs(difference - delta) < Math.abs(difference - bestDelta))) {
-                bestDelta = delta;
-                bestMeal = mealIndex;
-                bestFood = foodIndex;
-                replacement = next;
-              }
-            } else {
-              if (delta < 0 && (bestDelta === 0 || delta > bestDelta || Math.abs(difference - delta) < Math.abs(difference - bestDelta))) {
-                bestDelta = delta;
-                bestMeal = mealIndex;
-                bestFood = foodIndex;
-                replacement = next;
-              }
-            }
-          });
-        });
-
-        // If no existing flexible food can move, add a flexible food to a meal.
-        if (bestMeal < 0 || bestFood < 0 || !replacement) {
-          if (difference > 25 && meals.length > 0) {
-            const candidateNames = isVegan
-              ? ["Rice", "Oats", "Peanut Butter", "Sweet Potato"]
-              : ["Rice", "Oats", "Peanut Butter", "Sweet Potato"];
-
-            const candidate = candidateNames.find((name) => !avoidFood(name));
-            if (candidate) {
-              const unit = candidate === "Rice" ? "g cooked" : candidate === "Sweet Potato" ? "g" : "g";
-              const quantity = candidate === "Peanut Butter" ? 10 : candidate === "Oats" ? 20 : 50;
-              const targetMealIndex = meals.length > 1 ? 1 : 0;
-              meals[targetMealIndex].foods.push(calculateFood(candidate, quantity, unit));
-              meals[targetMealIndex] = recalculateMeal(meals[targetMealIndex]);
-              continue;
-            }
-          }
-          break;
+      // Supabase FunctionsHttpError may include the Edge Function's JSON body.
+      try {
+        const errorContext = (functionError as any).context;
+        if (errorContext && typeof errorContext.json === "function") {
+          const errorBody = await errorContext.json();
+          if (errorBody?.error) errorMessage = String(errorBody.error);
         }
-
-        meals[bestMeal].foods[bestFood] = replacement;
-        meals[bestMeal] = recalculateMeal(meals[bestMeal]);
+      } catch (readError) {
+        console.warn("Could not read Edge Function error response:", readError);
       }
 
-      // ---------------------------------------------------------
-      // 3. Final small correction. Choose the closest calorie state
-      //    from a small set of flexible-food adjustments.
-      // ---------------------------------------------------------
-      let totals = getDailyTotals();
-      let correctionIterations = 0;
+      console.error("generate-ai-plan Edge Function error:", functionError);
+      showMessage(errorMessage, "AI Plan Error");
+      return;
+    }
 
-      while (Math.abs(dailyCalories - totals.calories) > 40 && correctionIterations < 40) {
-        correctionIterations++;
-        const direction = dailyCalories > totals.calories ? 1 : -1;
-        let bestChoice: any = null;
-        const beforeDistance = Math.abs(dailyCalories - totals.calories);
+    if (!response?.success || !response?.plan) {
+      console.error("Unexpected generate-ai-plan response:", response);
+      throw new Error(response?.error || "The AI service returned an incomplete plan. Please try again.");
+    }
 
-        meals.forEach((meal: any, mealIndex: number) => {
-          meal.foods.forEach((food: any, foodIndex: number) => {
-            if (!calorieFlexibleFoods.includes(food.name)) return;
-            const step = getFoodStep(food.name);
-            const nextQuantity = food.quantity + direction * step;
-            if (nextQuantity < getFoodMin(food.name) || nextQuantity > getFoodMax(food.name)) return;
+    // Load the saved database row so the dashboard retains its existing
+    // aiPlan.plan_json data shape and all current dashboard features.
+    const { data: savedPlan, error: savedPlanError } = await supabase
+      .from("ai_plans")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-            const next = calculateFood(food.name, nextQuantity, food.unit);
-            const nextCalories = totals.calories - food.calories + next.calories;
-            const distance = Math.abs(dailyCalories - nextCalories);
+    if (savedPlanError) {
+      console.error("Generated plan could not be reloaded:", savedPlanError);
+      throw new Error("Your plan was generated, but the dashboard could not reload it. Refresh the page.");
+    }
 
-            if (distance < beforeDistance && (!bestChoice || distance < bestChoice.distance)) {
-              bestChoice = { mealIndex, foodIndex, next, distance };
-            }
-          });
-        });
+    if (!savedPlan?.plan_json) {
+      throw new Error("Gemini returned a plan, but no saved plan was found in your account.");
+    }
 
-        if (!bestChoice) break;
-        meals[bestChoice.mealIndex].foods[bestChoice.foodIndex] = bestChoice.next;
-        meals[bestChoice.mealIndex] = recalculateMeal(meals[bestChoice.mealIndex]);
-        totals = getDailyTotals();
-      }
-
-      meals = meals.map(recalculateMeal);
-      totals = getDailyTotals();
-
-      return {
-        day: dayNames[dayIndex],
-        meals,
-        target_calories: dailyCalories,
-        target_protein: dailyProtein,
-        actual_calories: Math.round(totals.calories),
-        actual_protein: Number(totals.protein.toFixed(1)),
-      };
-    });
-
-    return weeklyPlan;
+    setAiPlan(savedPlan);
+    showMessage(
+      "Gemini AI has successfully created your personalized workout, nutrition and recovery plan.",
+      "Your AI Plan Is Ready!"
+    );
+  } catch (error) {
+    console.error("AI Plan Generation Error:", error);
+    showMessage(
+      error instanceof Error ? error.message : "Something went wrong while creating your AI plan.",
+      "AI Plan Error"
+    );
+  } finally {
+    setGeneratingPlan(false);
   }
-
-  // Temporary dummy plan
-  const dummyPlan = {
-  summary: {
-    goal: profile?.fitness_goal,
-    current_weight: profile?.current_weight_kg,
-    goal_weight: profile?.goal_weight_kg,
-    calories,
-    protein: proteinTarget,
-    water: `${waterIntake} L`,
-  },
-
-  workout: {
-    weekly_plan: personalizedWeeklyPlan,
-},
-nutrition: {
-  daily_targets: {
-    calories,
-    protein: proteinTarget,
-    water: waterIntake,
-  },
-
-  weekly_plan: generateNutritionMeals(
-    profile,
-    calories,
-    proteinTarget
-  ),
-},
-
-  recovery: {
-    sleep_target: "7-9 hours",
-    rest_days: 1,
-  },
-};
-
-  const { data, error } = await supabase
-    .from("ai_plans")
-    .upsert(
-      {
-        user_id: user.id,
-        plan_json: dummyPlan,
-      },
-      {
-        onConflict: "user_id",
-      }
-    )
-    .select()
-    .single();
-
-  setGeneratingPlan(false);
-
-  if (error) {
-    console.error(error);
-    showMessage("Failed to save your AI Plan.", "AI Plan Error");
-    return;
-  }
-
-  setAiPlan(data);
-
-  showMessage("Your personalized workout and nutrition plan has been successfully updated.", "AI Plan Updated!");
 }
 
 async function loadAIPlan() {
@@ -3522,7 +2816,7 @@ const progressPercentage =
 
   {isPro && (
     <span className="inline-flex items-center w-fit px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold">
-      🔥 BodyWise Pro Active
+      {isTrialActive ? "🎁 7-Day Free Trial Active" : "🔥 BodyWise Pro Active"}
     </span>
   )}
 </div>
